@@ -1,41 +1,42 @@
 {% extends "layout.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Yazıyı Düzenle</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label>Başlık</label>
+            <input type="text" name="baslik" class="form-control" value="{{ yazi['baslik'] }}" required>
+        </div>
 
-{% block icerik %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow border-0 mt-4">
-            <div class="card-body p-5">
-                <h3 class="mb-4 fw-bold text-center">Yazıyı Düzenle</h3>
-                
-                <form method="post">
-                    <div class="mb-3">
-                        <label class="form-label">Başlık</label>
-                        <input type="text" name="baslik" class="form-control" value="{{ yazi['baslik'] }}" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Kategori</label>
-                        <select name="kategori" class="form-select">
-                            <option value="Ekonomi" {% if yazi['kategori'] == 'Ekonomi' %}selected{% endif %}>Ekonomi</option>
-                            <option value="Felsefe" {% if yazi['kategori'] == 'Felsefe' %}selected{% endif %}>Felsefe</option>
-                            <option value="Siyaset" {% if yazi['kategori'] == 'Siyaset' %}selected{% endif %}>Siyaset</option>
-                            <option value="Hukuk" {% if yazi['kategori'] == 'Hukuk' %}selected{% endif %}>Hukuk</option>
-                            <option value="Edebiyat" {% if yazi['kategori'] == 'Edebiyat' %}selected{% endif %}>Edebiyat</option>
-                        </select>
-                    </div>
+        <div class="mb-3">
+            <label>Kategori</label>
+            <select name="kategori" class="form-control">
+                <option value="Politika" {% if yazi['kategori'] == 'Politika' %}selected{% endif %}>Politika</option>
+                <option value="Hukuk" {% if yazi['kategori'] == 'Hukuk' %}selected{% endif %}>Hukuk</option>
+                <option value="Felsefe" {% if yazi['kategori'] == 'Felsefe' %}selected{% endif %}>Felsefe</option>
+                <option value="Sanat" {% if yazi['kategori'] == 'Sanat' %}selected{% endif %}>Sanat</option>
+            </select>
+        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">İçerik</label>
-                        <textarea name="icerik" class="form-control" rows="12" required>{{ yazi['icerik'] }}</textarea>
-                    </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-warning text-dark fw-bold">Güncellemeleri Kaydet</button>
-                        <a href="/{{ yazi['id'] }}" class="btn btn-outline-secondary">İptal</a>
-                    </div>
-                </form>
+        <div class="mb-3">
+            <label>Kapak Resmi (Değiştirmek istemiyorsan boş bırak)</label>
+            <input type="file" name="resim" class="form-control">
+            {% if yazi['resim'] %}
+                <small class="text-muted">Şu anki resim: {{ yazi['resim'] }}</small>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label>İçerik</label>
+            <textarea name="icerik" class="form-control" rows="10" required>{{ yazi['icerik'] }}</textarea>
+            <div class="form-text mt-2">
+                💡 İpucu: Yazının arasına resim eklemek için <a href="/admin/galeri" target="_blank">Galeri</a>'yi kullan.
             </div>
         </div>
-    </div>
+
+        <button type="submit" class="btn btn-warning">Güncelle</button>
+        <a href="{{ url_for('detay', id=yazi['id']) }}" class="btn btn-secondary">İptal</a>
+    </form>
 </div>
 {% endblock %}

@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>📸 Resim Galerisi (Depo)</h2>
+    <p class="lead">Yazılarınızın içine eklemek istediğiniz resimleri buraya yükleyin, kodu kopyalayıp yazının içine yapıştırın.</p>
+
+    <div class="card p-4 mb-4 bg-light">
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Bilgisayardan Resim Seç (İstersen 5-6 tane birden seç)</label>
+                <input type="file" name="dosyalar" class="form-control" multiple required>
+            </div>
+            <button type="submit" class="btn btn-primary">Resimleri Yükle</button>
+        </form>
+        {% if mesaj %}
+            <div class="alert alert-success mt-3">{{ mesaj }}</div>
+        {% endif %}
+    </div>
+
+    <hr>
+
+    <div class="row">
+        {% for resim in resimler %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <img src="{{ url_for('static', filename='uploads/' + resim) }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                <div class="card-body">
+                    <p class="small text-truncate">{{ resim }}</p>
+                    
+                    <label class="small text-muted">Yazıya eklenecek kod:</label>
+                    <textarea class="form-control form-control-sm mb-2" rows="2" readonly><img src="/static/uploads/{{ resim }}" class="img-fluid rounded my-3" style="width: 100%;"></textarea>
+                    
+                    <small class="text-success">👆 Bu kodu kopyala, yazının içine yapıştır.</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
