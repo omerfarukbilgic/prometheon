@@ -63,6 +63,10 @@ def ara():
 @app.route('/<int:id>')
 def detay(id):
     conn = db_baglantisi_kur()
+# --- YENİ EKLENEN KISIM (SAYAÇ ARTTIRMA) ---
+    conn.execute('UPDATE yazilar SET goruntulenme = goruntulenme + 1 WHERE id = ?', (id,))
+    conn.commit()
+
     sorgu = "SELECT yazilar.*, users.ad_soyad, users.profil_resmi, users.biyografi FROM yazilar JOIN users ON yazilar.author_id = users.id WHERE yazilar.id = ?"
     yazi = conn.execute(sorgu, (id,)).fetchone()
     yorumlar = conn.execute("SELECT yorumlar.*, users.ad_soyad FROM yorumlar JOIN users ON yorumlar.user_id = users.id WHERE post_id = ? ORDER BY id DESC", (id,)).fetchall()

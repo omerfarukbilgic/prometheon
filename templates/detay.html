@@ -11,7 +11,9 @@
                 🗓 {{ yazi['tarih'] }} &nbsp; | &nbsp; ⏱️ {{ yazi['icerik'] | okuma_suresi }} okuma süresi
             </p>
         </div>
-
+<span class="text-muted ms-3">
+    <i class="fas fa-eye"></i> {{ yazi['goruntulenme'] }} Görüntülenme
+</span>
         <div class="shadow rounded overflow-hidden mb-5">
             <img src="https://picsum.photos/seed/{{ yazi['id'] }}/1200/600" class="img-fluid w-100" alt="Kapak Resmi">
         </div>
