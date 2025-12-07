@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block icerik %}
+<div class="text-center mb-5">
+    <h1 class="display-4 fw-bold text-dark">Kalemlerimiz</h1>
+    <p class="lead text-muted fst-italic">Prometheon'a hayat veren düşünürler.</p>
+    <div style="width: 60px; height: 3px; background-color: #556B2F; margin: 20px auto;"></div>
+</div>
+
+<div class="row justify-content-center">
+    {% for yazar in yazarlar %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card text-center h-100 border-0 shadow-sm p-4" style="background-color: #fff;">
+            
+            <div class="mx-auto mb-3" style="width: 120px; height: 120px; overflow: hidden; border-radius: 50%; border: 3px solid #E3DAC9;">
+                {% if yazar['profil_resmi'] %}
+                    <img src="{{ yazar['profil_resmi'] }}" class="img-fluid" style="height: 100%; object-fit: cover;">
+                {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ yazar['ad_soyad'] }}&background=556B2F&color=fff&size=200" class="img-fluid">
+                {% endif %}
+            </div>
+            
+            <div class="card-body">
+                <h3 class="card-title mb-1 text-dark fw-bold">{{ yazar['ad_soyad'] }}</h3>
+                
+                <span class="badge rounded-pill mb-3" style="background-color: #E3DAC9; color: #4B5320; font-weight: bold;">
+                    {% if yazar['rol'] == 'admin' %}Genel Yayın Yönetmeni{% else %}Yazar{% endif %}
+                </span>
+                
+                <p class="card-text text-muted small px-3">
+                    {{ yazar['biyografi'] }}
+                </p>
+                
+                <a href="/yazar/{{ yazar['id'] }}" class="btn btn-outline-dark btn-sm mt-3 px-4 rounded-pill">Tüm Yazıları</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

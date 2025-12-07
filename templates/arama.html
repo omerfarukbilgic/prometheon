@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block icerik %}
+<div class="text-center mb-5">
+    <h5 class="text-muted text-uppercase ls-2">Arama Sonuçları</h5>
+    <h1 class="display-4 fw-bold">"{{ kelime }}"</h1>
+    <p class="text-muted">{{ posts|length }} sonuç bulundu.</p>
+    <div style="width: 60px; height: 3px; background-color: #556B2F; margin: 20px auto;"></div>
+</div>
+
+<div class="row">
+    {% for yazi in posts %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <a href="/{{ yazi['id'] }}" class="card-img-wrapper d-block mb-3">
+                <img src="https://picsum.photos/seed/{{ yazi['id'] }}/800/500" class="card-img-top w-100" style="height: 200px; object-fit: cover;">
+            </a>
+            <div class="card-body p-3">
+                <a href="/kategori/{{ yazi['kategori'] }}" class="kategori-badge">{{ yazi['kategori'] }}</a>
+                <h4 class="card-title fw-bold"><a href="/{{ yazi['id'] }}" class="text-dark">{{ yazi['baslik'] }}</a></h4>
+                <p class="card-text text-muted small">{{ yazi['icerik'][0:100] }}...</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <div class="col-12 text-center py-5">
+            <h3 class="text-muted">Maalesef "{{ kelime }}" ile ilgili bir şey bulamadık.</h3>
+            <a href="/" class="btn btn-outline-dark mt-3">Anasayfaya Dön</a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

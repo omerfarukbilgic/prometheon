@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block icerik %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4 fw-bold">Aramıza Katıl</h2>
+                
+                {% if hata %}
+                    <div class="alert alert-danger">{{ hata }}</div>
+                {% endif %}
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label>Ad Soyad</label>
+                        <input type="text" name="ad_soyad" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>E-posta Adresi</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Şifre</label>
+                        <input type="password" name="sifre" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100 py-2">Kayıt Ol</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="/giris" class="text-muted small">Zaten hesabın var mı? Giriş yap.</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

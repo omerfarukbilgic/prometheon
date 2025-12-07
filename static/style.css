@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* GENEL AYARLAR */
+body {
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    background-color: #F8F8F4;
+    line-height: 1.7;
+}
+
+/* --- MASAÜSTÜ NAVBAR AYARLARI (Varsayılan) --- */
+/* --- NAVBAR AYARLARI --- */
+/* --- YENİ NAVBAR AYARLARI (DAHA KİBAR) --- */
+/* --- NAVBAR AYARLARI (FADE EFEKTLİ) --- */
+/* --- NAVBAR AYARLARI (ÇİZGİSİ DE FADE EDECEK) --- */
+/* --- NAVBAR AYARLARI (TAMAMEN SAYDAM ORTA) --- */
+/* --- NAVBAR AYARLARI (YUMUŞAK GEÇİŞ VE ÇİZGİ) --- */
+/* --- NAVBAR AYARLARI (ŞELALE EFEKTİ: YUKARIDAN AŞAĞIYA ERİME) --- */
+/* --- NAVBAR AYARLARI (ŞELALE EFEKTİ) --- */
+.custom-navbar {
+    /* Yukarıdan Aşağıya Erime (Waterfall) */
+    background: linear-gradient(
+        to bottom, 
+        #E3DAC9 0%,       /* En Üst: Tam Renk */
+        #E3DAC9 60%,      /* %60'a kadar renkli kalsın */
+        rgba(227, 218, 201, 0) 100% /* En Alt: Tamamen erisin */
+    ) !important;
+
+    border-bottom: none; 
+    box-shadow: none;
+    
+    /* Barın yüksekliğini rahatlattık */
+    padding: 1.8rem 0; 
+    
+    position: relative;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+}
+
+/* --- ORTADAKİ LOGO (DİNAMİK ZOOM EFEKTİ) --- */
+/* --- ORTADAKİ LOGO (DİNAMİK ZOOM EFEKTİ) --- */
+.brand-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 10px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.brand-center img {
+    height: 85px; 
+    
+    /* Animasyon ayarı */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* --- YENİ KESKİNLİK AYARLARI (ALWAYS SHARP) --- */
+    
+    /* 1. Tarayıcıya resmi "Kontrastlı" işlemesini söyle (Özellikle Mac/Chrome için) */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: high-quality; 
+    
+    /* 2. Resmi her zaman 3D uzayda gibi tutarak GPU'yu tetikle (Bu, geçişlerdeki titremeyi ve bulanıklığı önler) */
+    transform: translateZ(0);
+    -webkit-font-smoothing: antialiased;
+    
+    /* 3. Kenar pürüzlerini gizle */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* --- MOUSE ÜZERİNE GELİNCE (HOVER) --- */
+/* --- MOUSE ÜZERİNE GELİNCE (HOVER) --- */
+/* --- YENİ LOGO AYARLARI (GRID SİSTEMİ İÇİN) --- */
+
+/* Logonun Normal Hali */
+.navbar-brand img {
+    /* Yükseklik */
+    height: 100px; 
+    
+    /* Geçiş Yumuşaklığı */
+    transition: transform 0.3s ease-out;
+    
+    /* --- Keskinlik ve Titreme Önleyici Ayarlar --- */
+    /* Bu kodlar, logo büyürken barın titremesini veya bulanıklaşmayı engeller */
+    -webkit-backface-visibility: hidden; 
+    backface-visibility: hidden;
+    transform: translateZ(0); 
+    image-rendering: -webkit-optimize-contrast;
+}
+
+/* Mouse Üzerine Gelince (Hover) */
+.navbar-brand:hover img {
+    /* Çok hafif büyüme (%8 oranında) - Abartısız */
+    transform: scale(1.08); 
+    
+    cursor: pointer;
+}
+
+/* MENÜ LİNKLERİ */
+.nav-link {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #4B5320 !important; /* Haki Yeşili */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    margin: 0 10px;
+}
+.nav-link:hover { color: #000 !important; }
+
+/* --- MOBİL İÇİN ÖZEL AYARLAR (EKRAN KÜÇÜLÜNCE BURASI ÇALIŞIR) --- */
+@media (max-width: 991px) {
+    
+    /* Mobilde barı incelt */
+    .custom-navbar {
+        padding: 0.8rem 0; 
+    }
+
+    /* Mobilde logoyu küçült ve menü butonuna yer aç */
+    .brand-center img {
+        height: 55px; /* Mobilde kibar dursun */
+    }
+    
+    /* Mobilde logoyu biraz yukarı kaydırabiliriz gerekirse */
+    .brand-center {
+        width: 100%; /* Çakışmayı önlemek için */
+        pointer-events: none; /* Logonun arkasındaki butonlara basılabilsin */
+    }
+    
+    /* Logo resminin tıklanabilirliğini geri aç */
+    .brand-center img {
+        pointer-events: auto;
+    }
+    
+    /* Menü açılınca arka planı düzelt */
+    .navbar-collapse {
+        background-color: #E3DAC9;
+        padding: 20px;
+        border-radius: 0 0 10px 10px;
+        margin-top: 10px;
+        text-align: center; /* Mobilde linkler ortalansın */
+    }
+}
+
+/* DİĞER STANDART AYARLAR */
+h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; color: #111; }
+a { text-decoration: none; color: inherit; }
+.kategori-badge {
+    font-size: 0.75rem; text-transform: uppercase; font-weight: 700;
+    letter-spacing: 1px; color: #4B5320; margin-bottom: 10px;
+    display: inline-block; text-decoration: none;
+}
+.card { border: none; background: transparent; margin-bottom: 30px; }
+.card-img-wrapper { overflow: hidden; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.card-img-top { transition: transform 0.4s ease; }
+.card:hover .card-img-top { transform: scale(1.03); }
+/* --- FOOTER AYARLARI (TERS ŞELALE: AŞAĞIDAN YUKARIYA) --- */
+.footer {
+    /* DİKEY GEÇİŞ (Bottom to Top) */
+    background: linear-gradient(
+        to top, 
+        #E3DAC9 0%,       /* En Alt: Tam Renk (Zemin) */
+        #E3DAC9 40%,      /* %40'a kadar tam renk kalsın (Yazılar net okunsun) */
+        rgba(227, 218, 201, 0) 100% /* En Üst: Tamamen eriyip saydamlaşsın */
+    ) !important;
+
+    color: #4B5320; /* Yazı Rengi: Haki Yeşili */
+    
+    /* Fade efektinin kendini gösterebilmesi için üst boşluğu artırıyoruz */
+    padding-top: 8rem; 
+    padding-bottom: 2rem;
+    
+    /* Footer'ı içerikten çok uzaklaştırmayalım, fade efekti birleşsin */
+    margin-top: 0; 
+}
+/* DETAY SAYFASI İÇERİK AYARLARI */
+.article-content {
+    font-size: 1.15rem; /* Yazı boyutu: Rahat okunur */
+    color: #333;
+    line-height: 1.8; /* Satır aralarını açtık, göz yormasın */
+    
+    /* --- İŞTE SİHİRLİ KOD BURASI --- */
+    white-space: pre-wrap; /* Enter tuşlarını ve boşlukları olduğu gibi göster! */
+    
+    /* İstersen yazıyı iki yana yaslamak için bunu da açabilirsin: */
+    /* text-align: justify; */
+    
+    font-family: 'Georgia', serif; /* Kitap gibi dursun */
+    margin-bottom: 3rem;
+}
+/* SOSYAL MEDYA İKONLARI */
+.social-icons a {
+    color: #4B5320; /* Haki Yeşili */
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.social-icons a:hover {
+    color: #111; /* Üzerine gelince siyah */
+    transform: translateY(-3px); /* Hafif yukarı zıplasın */
+}

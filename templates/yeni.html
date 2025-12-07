@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block icerik %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow border-0 p-5 mt-4">
+            <h2 class="mb-4 fw-bold text-center">Yeni Bir Şeyler Karala</h2>
+            
+            <form method="post" enctype="multipart/form-data">
+                
+                <div class="mb-3">
+                    <label class="form-label">Başlık</label>
+                    <input type="text" name="baslik" class="form-control" placeholder="Çarpıcı bir başlık..." required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Kapak Görseli</label>
+                    <input type="file" name="resim" class="form-control" accept="image/*">
+                    <small class="text-muted">Bilgisayarından bir resim seç.</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Kategori</label>
+                    <select name="kategori" class="form-select">
+                        <option value="Ekonomi">Ekonomi</option>
+                        <option value="Felsefe">Felsefe</option>
+                        <option value="Siyaset">Siyaset</option>
+                        <option value="Hukuk">Hukuk</option>
+                        <option value="Edebiyat">Edebiyat</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">İçerik</label>
+                    <textarea name="icerik" class="form-control" rows="12" placeholder="Düşüncelerini buraya dök..." required></textarea>
+                </div>
+                
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-dark py-2">Yayınla (veya Onaya Gönder)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

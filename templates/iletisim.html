@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block icerik %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center mb-5">
+        <h1 class="display-4 fw-bold">Bize Ulaşın</h1>
+        <p class="lead text-muted">Fikirlerinizi duymak için sabırsızlanıyoruz.</p>
+        <div style="width: 60px; height: 3px; background-color: #556B2F; margin: 20px auto;"></div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card border-0 shadow-sm p-4">
+            
+            {% if basarili %}
+                <div class="alert alert-success text-center">
+                    <h4>✅ Mesajınız Alındı!</h4>
+                    <p>En kısa sürede size dönüş yapacağız.</p>
+                </div>
+            {% else %}
+                <form method="post">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label">İsim Soyad</label>
+                            <input type="text" name="isim" class="form-control" required>
+                        </div>
+                        <div class="col">
+                            <label class="form-label">E-posta</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Konu</label>
+                        <input type="text" name="konu" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Mesajınız</label>
+                        <textarea name="mesaj" class="form-control" rows="6" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-dark px-5 py-2">Gönder</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block icerik %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        
+        <div class="text-center mb-4">
+            <a href="/kategori/{{ yazi['kategori'] }}" class="badge bg-danger text-uppercase px-3 py-2 text-decoration-none">{{ yazi['kategori'] }}</a>
+            <h1 class="fw-bold mt-3 display-4 text-dark">{{ yazi['baslik'] }}</h1>
+            <p class="text-muted mt-2">
+                🗓 {{ yazi['tarih'] }} &nbsp; | &nbsp; ⏱️ {{ yazi['icerik'] | okuma_suresi }} okuma süresi
+            </p>
+        </div>
+
+        <div class="shadow rounded overflow-hidden mb-5">
+            <img src="https://picsum.photos/seed/{{ yazi['id'] }}/1200/600" class="img-fluid w-100" alt="Kapak Resmi">
+        </div>
+
+        <div class="article-content fs-5 lh-lg text-dark" style="font-family: 'Georgia', serif;">
+            {{ yazi['icerik'] }}
+            </div>
+
+        <div class="card border-0 bg-light p-4 mt-5 mb-5 rounded-3">
+            <div class="d-flex align-items-center">
+                
+                <div class="flex-shrink-0">
+                    <a href="/yazar/{{ yazi['author_id'] }}">
+                        {% if yazi['profil_resmi'] %}
+                            <img src="{{ yazi['profil_resmi'] }}" class="rounded-circle" width="80" height="80" style="object-fit: cover; border: 2px solid #556B2F;">
+                        {% else %}
+                            <img src="https://ui-avatars.com/api/?name={{ yazi['ad_soyad'] }}&background=556B2F&color=fff&size=128" class="rounded-circle" width="80" height="80">
+                        {% endif %}
+                    </a>
+                </div>
+                
+                <div class="flex-grow-1 ms-4">
+                    <h5 class="fw-bold mb-1">
+                        <a href="/yazar/{{ yazi['author_id'] }}" class="text-dark text-decoration-none">
+                            {{ yazi['ad_soyad'] }}
+                        </a>
+                    </h5>
+                    <p class="text-muted small mb-0 fst-italic">
+                        {{ yazi['biyografi'] }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+ 
+        </div>
+
+        {% if session.get('rol') == 'admin' or session.get('user_id') == yazi['author_id'] %}
+<div class="card bg-light border-warning mt-5">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <span class="text-warning fw-bold">⚠️ Yönetici Paneli</span>
+        <div>
+            <a href="/{{ yazi['id'] }}/duzenle" class="btn btn-outline-dark btn-sm">Düzenle</a>
+            <form action="/{{ yazi['id'] }}/sil" method="post" class="d-inline">
+                <button class="btn btn-danger btn-sm" onclick="return confirm('Emin misin?')">Sil</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+        <hr class="my-5">
+        <div class="text-center pb-5">
+            <a href="/" class="btn btn-outline-secondary rounded-pill px-4">← Anasayfaya Dön</a>
+        </div>
+    </div>
+</div>
+<div class="mt-5 pt-5 border-top">
+            <h3 class="fw-bold mb-4">Yorumlar</h3>
+            
+            {% for yorum in yorumlar %}
+                <div class="d-flex mb-4">
+                    <div class="flex-shrink-0">
+                        <img src="https://ui-avatars.com/api/?name={{ yorum['ad_soyad'] }}&background=random" class="rounded-circle" width="50" alt="User">
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="fw-bold mb-1">{{ yorum['ad_soyad'] }} <small class="text-muted fw-normal ms-2">{{ yorum['tarih'] }}</small></h6>
+                        <p class="mb-0">{{ yorum['yorum'] }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-muted">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>
+            {% endfor %}
+
+            {% if session.get('user_id') %}
+                <form action="/yorum-yap/{{ yazi['id'] }}" method="post" class="mt-4">
+                    <div class="mb-3">
+                        <label class="form-label">Senin Düşüncen Ne?</label>
+                        <textarea name="yorum" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-dark">Yorumu Gönder</button>
+                </form>
+            {% else %}
+                <div class="alert alert-info mt-4">
+                    Yorum yapmak için <a href="/giris" class="alert-link">giriş yapmalısın</a>.
+                </div>
+            {% endif %}
+        </div>
+{% endblock %}

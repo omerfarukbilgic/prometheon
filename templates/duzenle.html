@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block icerik %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow border-0 mt-4">
+            <div class="card-body p-5">
+                <h3 class="mb-4 fw-bold text-center">Yazıyı Düzenle</h3>
+                
+                <form method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Başlık</label>
+                        <input type="text" name="baslik" class="form-control" value="{{ yazi['baslik'] }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Kategori</label>
+                        <select name="kategori" class="form-select">
+                            <option value="Ekonomi" {% if yazi['kategori'] == 'Ekonomi' %}selected{% endif %}>Ekonomi</option>
+                            <option value="Felsefe" {% if yazi['kategori'] == 'Felsefe' %}selected{% endif %}>Felsefe</option>
+                            <option value="Siyaset" {% if yazi['kategori'] == 'Siyaset' %}selected{% endif %}>Siyaset</option>
+                            <option value="Hukuk" {% if yazi['kategori'] == 'Hukuk' %}selected{% endif %}>Hukuk</option>
+                            <option value="Edebiyat" {% if yazi['kategori'] == 'Edebiyat' %}selected{% endif %}>Edebiyat</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">İçerik</label>
+                        <textarea name="icerik" class="form-control" rows="12" required>{{ yazi['icerik'] }}</textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning text-dark fw-bold">Güncellemeleri Kaydet</button>
+                        <a href="/{{ yazi['id'] }}" class="btn btn-outline-secondary">İptal</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

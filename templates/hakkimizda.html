@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+
+{% block icerik %}
+<style>
+    /* MANİFESTOYA ÖZEL TASARIM */
+    .manifesto-container {
+        max-width: 720px; /* Okuma kolaylığı için dar sütun */
+        margin: 0 auto;
+        font-family: 'Georgia', serif; /* Daha ciddi, kitap gibi bir font */
+        color: #111;
+        line-height: 1.9;
+        font-size: 1.2rem;
+    }
+
+    /* Drop Cap: İlk harfi büyütme sanatı */
+    .drop-cap::first-letter {
+        float: left;
+        font-size: 4.5rem;
+        line-height: 0.8;
+        font-weight: bold;
+        padding-right: 12px;
+        color: #4B5320; /* Haki Yeşili */
+        font-family: 'Playfair Display', serif;
+    }
+
+    .imza {
+        margin-top: 50px;
+        text-align: right;
+        font-family: 'Playfair Display', serif;
+        font-style: italic;
+        font-size: 1.4rem;
+        color: #555;
+    }
+</style>
+
+<div class="row justify-content-center mb-5">
+    <div class="col-lg-8">
+        <div class="text-center mb-5">
+            <h6 class="text-uppercase letter-spacing-2 text-muted mb-3" style="letter-spacing: 2px;">Hakkımızda</h6>
+            <h1 class="display-4 fw-bold" style="font-family: 'Playfair Display', serif;">Prometheon Manifestosu</h1>
+            <div style="width: 40px; height: 2px; background-color: #4B5320; margin: 30px auto;"></div>
+        </div>
+
+        <div class="manifesto-container">
+            <p class="drop-cap">
+                Bilgi çağında değil, gürültü çağında yaşıyoruz. Her saniye üzerimize yağan veri yağmuru altında ıslanıyor ama temizlenmiyoruz. Prometheon, işte bu gürültünün ortasında bir sessizlik, kaosun içinde bir düzen arayışıdır.
+            </p>
+
+            <p>
+                Bizler, ateşi tanrılardan çalıp insanlara veren Prometheus'un cesaretinden ilham alıyoruz. Amacımız sadece haber vermek veya veri paylaşmak değil; o verinin arkasındaki hikayeyi, felsefeyi ve insanı görebilmektir.
+            </p>
+            
+            <p>
+                İktisadın soğuk rakamlarını felsefenin sıcaklığıyla, siyasetin sertliğini edebiyatın naifliğiyle harmanlıyoruz. Burası bir haber sitesi değil, burası modern dünyanın karmaşasına karşı kurulmuş bir düşünce sığınağıdır.
+            </p>
+
+            <p>
+                Sözümüz, anlam arayanlara; yazımız, düşünmeye cüret edenleredir.
+            </p>
+
+            <div class="imza">
+                <p>Prometheon Yayın Kurulu</p>
+                <img src="{{ url_for('static', filename='logo.png') }}" height="50" style="opacity: 0.8; filter: grayscale(100%);">
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
