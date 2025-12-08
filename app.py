@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from flask import Flask, render_template, request, url_for, redirect, session
+from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -19,12 +19,7 @@ def db_baglantisi_kur():
     conn.row_factory = sqlite3.Row
     return conn
 
-# --- EKSİK OLAN FİLTRELER (BU KISIM ÇOK ÖNEMLİ) ---
-@app.template_filter('nl2br')
-def nl2br(value):
-    if not value: return ""
-    return value.replace('\n', '<br>')
-
+# --- FİLTRELER ---
 @app.template_filter('okuma_suresi')
 def okuma_suresi_hesapla(metin):
     if not metin: return "1 dk"
@@ -34,7 +29,6 @@ def okuma_suresi_hesapla(metin):
     return f"{dakika} dk"
 
 # --- ROTALAR ---
-
 @app.route("/")
 def anasayfa():
     conn = db_baglantisi_kur()
@@ -45,7 +39,6 @@ def anasayfa():
 @app.route('/<int:id>')
 def detay(id):
     conn = db_baglantisi_kur()
-    # Sayaç
     try:
         conn.execute('UPDATE yazilar SET goruntulenme = goruntulenme + 1 WHERE id = ?', (id,))
         conn.commit()
@@ -54,7 +47,6 @@ def detay(id):
     sorgu = "SELECT yazilar.*, users.ad_soyad, users.profil_resmi, users.biyografi FROM yazilar JOIN users ON yazilar.author_id = users.id WHERE yazilar.id = ?"
     yazi = conn.execute(sorgu, (id,)).fetchone()
     
-    # Yorumları güvenli şekilde çek
     try:
         yorumlar = conn.execute("SELECT yorumlar.*, users.ad_soyad FROM yorumlar JOIN users ON yorumlar.user_id = users.id WHERE post_id = ? ORDER BY id DESC", (id,)).fetchall()
     except:
@@ -71,7 +63,6 @@ def yeni_yazi():
         icerik = request.form['icerik']
         kategori = request.form['kategori']
         
-        # Resim Yükleme
         resim_dosyasi = request.files.get('resim')
         resim_adi = "" 
         if resim_dosyasi and resim_dosyasi.filename != '':
@@ -118,10 +109,21 @@ def duzenle(id):
     conn.close()
     return render_template('duzenle.html', yazi=yazi)
 
+# --- RESİM YÜKLEME SERVİSİ (Upload) ---
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'upload' not in request.files:
+        return jsonify({'error': {'message': 'Dosya yok'}}), 400
+    f = request.files['upload']
+    filename = secure_filename(f.filename)
+    f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    url = url_for('static', filename='uploads/' + filename)
+    return jsonify({'uploaded': 1, 'fileName': filename, 'url': url})
+
+# --- GALERİ SAYFASI ---
 @app.route('/admin/galeri', methods=('GET', 'POST'))
 def galeri():
     if session.get('rol') not in ['admin', 'yazar']: return "Yetkiniz yok", 403
-    
     mesaj = ""
     if request.method == 'POST':
         files = request.files.getlist('dosyalar')
@@ -130,14 +132,12 @@ def galeri():
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         mesaj = "Resimler yüklendi!"
-
     resimler = []
     try: resimler = os.listdir(app.config['UPLOAD_FOLDER'])
     except: pass
-    
     return render_template('galeri.html', resimler=resimler, mesaj=mesaj)
 
-# --- DİĞER ROTALAR (Giriş/Çıkış vb.) ---
+# --- DİĞER ROTALAR (Giriş, Kayıt, Admin vb.) ---
 @app.route("/giris", methods=('GET', 'POST'))
 def giris():
     if request.method == 'POST':
@@ -182,6 +182,20 @@ def sil(id):
     conn = db_baglantisi_kur(); conn.execute('DELETE FROM yazilar WHERE id = ?', (id,)); conn.commit(); conn.close()
     return redirect(url_for('anasayfa'))
 
+@app.route('/yazarlar')
+def yazarlar_sayfasi():
+    conn = db_baglantisi_kur()
+    yazarlar = conn.execute("SELECT * FROM users WHERE rol IN ('admin', 'yazar')").fetchall()
+    conn.close()
+    return render_template("yazarlar.html", yazarlar=yazarlar)
+
+@app.route('/hakkimizda')
+def hakkimizda(): return render_template('hakkimizda.html')
+
+@app.route('/iletisim')
+def iletisim(): return render_template('iletisim.html')
+
+# --- TAMİR ROTASI ---
 @app.route('/tamir')
 def tamir_et():
     conn = db_baglantisi_kur(); mesaj = []
@@ -190,6 +204,8 @@ def tamir_et():
     try: conn.execute("ALTER TABLE yazilar ADD COLUMN goruntulenme INTEGER DEFAULT 0"); conn.commit(); mesaj.append("✅ İzlenme OK")
     except: pass
     try: conn.execute("ALTER TABLE users ADD COLUMN profil_resmi TEXT"); conn.commit(); mesaj.append("✅ Profil OK")
+    except: pass
+    try: conn.execute("ALTER TABLE users ADD COLUMN biyografi TEXT"); conn.commit(); mesaj.append("✅ Biyo OK")
     except: pass
     conn.close(); return "<br>".join(mesaj)
 

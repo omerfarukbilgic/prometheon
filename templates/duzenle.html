@@ -1,42 +1,63 @@
 {% extends "layout.html" %}
+
 {% block content %}
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+
 <div class="container mt-5">
-    <h2 class="mb-4">Yazıyı Düzenle</h2>
-    
-    <form method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label>Başlık</label>
-            <input type="text" name="baslik" class="form-control" value="{{ yazi['baslik'] }}" required>
-        </div>
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <h2 class="mb-4">✏️ Yazıyı Düzenle</h2>
+            
+            <form method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="fw-bold">Başlık</label>
+                    <input type="text" name="baslik" class="form-control" value="{{ yazi['baslik'] }}" required>
+                </div>
 
-        <div class="mb-3">
-            <label>Kategori</label>
-            <select name="kategori" class="form-control">
-                <option value="Politika" {% if yazi['kategori'] == 'Politika' %}selected{% endif %}>Politika</option>
-                <option value="Hukuk" {% if yazi['kategori'] == 'Hukuk' %}selected{% endif %}>Hukuk</option>
-                <option value="Felsefe" {% if yazi['kategori'] == 'Felsefe' %}selected{% endif %}>Felsefe</option>
-                <option value="Sanat" {% if yazi['kategori'] == 'Sanat' %}selected{% endif %}>Sanat</option>
-            </select>
-        </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="fw-bold">Kategori</label>
+                        <select name="kategori" class="form-select">
+                            <option value="Politika" {% if yazi['kategori'] == 'Politika' %}selected{% endif %}>Politika</option>
+                            <option value="Hukuk" {% if yazi['kategori'] == 'Hukuk' %}selected{% endif %}>Hukuk</option>
+                            <option value="Felsefe" {% if yazi['kategori'] == 'Felsefe' %}selected{% endif %}>Felsefe</option>
+                            <option value="Sanat" {% if yazi['kategori'] == 'Sanat' %}selected{% endif %}>Sanat</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="fw-bold">Kapak Resmi</label>
+                        <input type="file" name="resim" class="form-control">
+                        {% if yazi['resim'] %}
+                            <small class="text-muted">Mevcut: {{ yazi['resim'] }}</small>
+                        {% endif %}
+                    </div>
+                </div>
 
-        <div class="mb-3">
-            <label>Kapak Resmi (Değiştirmek istemiyorsan boş bırak)</label>
-            <input type="file" name="resim" class="form-control">
-            {% if yazi['resim'] %}
-                <small class="text-muted">Şu anki resim: {{ yazi['resim'] }}</small>
-            {% endif %}
-        </div>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="fw-bold mb-0">İçerik</label>
+                        <a href="{{ url_for('galeri') }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-images me-1"></i> 📸 Galeri / Resim Yükle
+                        </a>
+                    </div>
+                    <textarea name="icerik" id="editor">{{ yazi['icerik'] }}</textarea>
+                </div>
 
-        <div class="mb-3">
-            <label>İçerik</label>
-            <textarea name="icerik" class="form-control" rows="10" required>{{ yazi['icerik'] }}</textarea>
-            <div class="form-text mt-2">
-                💡 İpucu: Yazının arasına resim eklemek için <a href="/admin/galeri" target="_blank">Galeri</a>'yi kullan.
-            </div>
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('detay', id=yazi['id']) }}" class="btn btn-secondary">İptal</a>
+                    <button type="submit" class="btn btn-warning px-5">Güncelle</button>
+                </div>
+            </form>
         </div>
-
-        <button type="submit" class="btn btn-warning">Güncelle</button>
-        <a href="{{ url_for('detay', id=yazi['id']) }}" class="btn btn-secondary">İptal</a>
-    </form>
+    </div>
 </div>
+
+<script>
+    CKEDITOR.replace('editor', {
+        height: 400,
+        filebrowserUploadUrl: '/upload',
+        filebrowserUploadMethod: 'form',
+        removeButtons: 'Source,Save,NewPage,Preview,Print,Templates,Cut,Copy,Paste,PasteText,PasteFromWord,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,CreateDiv,BidiLtr,BidiRtl,Language,Anchor,Flash,Smiley,PageBreak,Iframe,About'
+    });
+</script>
 {% endblock %}

@@ -31,7 +31,12 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">İçerik</label>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+    <label class="form-label fw-bold mb-0">İçerik</label>
+    <a href="{{ url_for('galeri') }}" target="_blank" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-images me-1"></i> 📸 Resim Deposunu (Galeriyi) Aç
+    </a>
+</div>
                     <textarea name="icerik" class="form-control" rows="12" placeholder="Düşüncelerini buraya dök..." required></textarea>
                 </div>
                 
