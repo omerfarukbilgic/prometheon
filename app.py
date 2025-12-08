@@ -422,7 +422,7 @@ def upload_file():
 # --- SABİT SAYFALAR ---
 @app.route('/hakkimizda')
 def hakkimizda():
-    return render_template('hakkımızda.html')  # dosya adın nasıl ise ona göre düzelt
+    return render_template('hakkimizda.html')  # dosya adın nasıl ise ona göre düzelt
 
 @app.route('/iletisim', methods=('GET', 'POST'))
 def iletisim():
