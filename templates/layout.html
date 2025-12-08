@@ -1,104 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Prometheon | Düşünce Ateşi</title>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
     <style>
-        .nav-link { color: #4B5320 !important; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .nav-link:hover { color: #000 !important; }
-        .dropdown-item { font-size: 0.9rem; color: #333; }
-        
-        .header-grid {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            width: 100%;
-        }
-        
-        @media (max-width: 991px) {
-            .header-grid { display: flex; justify-content: space-between; }
-        }
+        body { font-family: 'Merriweather', serif; background-color: #f4f1ea; color: #2c3e50; }
+        .navbar { background-color: #f4f1ea; border-bottom: 1px solid #dcd6cc; padding: 1.5rem 0; }
+        .navbar-brand { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.8rem; letter-spacing: 1px; color: #3e3e3e; }
+        .nav-link { font-family: 'Playfair Display', serif; font-weight: 600; color: #5a5a5a; margin: 0 10px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-link:hover { color: #000; }
+        .dropdown-menu { background-color: #fdfcf8; border: 1px solid #e0e0e0; }
+        .btn-dark { background-color: #2c3e50; border: none; }
+        .btn-warning { background-color: #d4a017; color: #fff; border: none; }
+        footer { margin-top: 5rem; padding: 3rem 0; border-top: 1px solid #dcd6cc; background-color: #f9f7f2; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg custom-navbar sticky-top">
+    <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
-            
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <a class="navbar-brand" href="{{ url_for('anasayfa') }}">PROMETHEON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
-            <div class="collapse navbar-collapse w-100" id="navbarMenu">
-                <div class="header-grid">
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('anasayfa') }}">ANASAYFA</a></li>
                     
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
-                        
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">KATEGORİLER</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Politika') }}">Politika</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Hukuk') }}">Hukuk</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Felsefe') }}">Felsefe</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Sanat') }}">Sanat</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Ekonomi') }}">Ekonomi</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('yazarlar_sayfasi') }}">YAZARLAR</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('hakkimizda') }}">HAKKIMIZDA</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('iletisim') }}">İLETİŞİM</a></li>
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
+                    {% if session.get('giris_yapildi') %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Kategoriler</a>
-                            <ul class="dropdown-menu border-0 shadow" style="background-color: #F8F8F4;">
-                                <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Politika') }}">Politika</a></li>
-    <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Hukuk') }}">Hukuk</a></li>
-    <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Felsefe') }}">Felsefe</a></li>
-    <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Sanat') }}">Sanat</a></li>
-</ul>
-
-                        <li class="nav-item"><a class="nav-link" href="/yazarlar">Yazarlar</a></li>
-                    </ul>
-
-                    <div class="text-center">
-                        <a class="navbar-brand m-0" href="/">
-                            <img src="{{ url_for('static', filename='logo.png') }}" alt="Prometheon">
-                        </a>
-                    </div>
-
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 justify-content-end align-items-center">
-                        
-                        <li class="nav-item me-3">
-                            <form action="/ara" method="get" class="d-flex align-items-center">
-                                <input type="search" name="q" class="form-control form-control-sm border-0 bg-light" placeholder="Ara..." style="width: 120px; border-radius: 20px;">
-                            </form>
+                            <a class="nav-link dropdown-toggle fw-bold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i> HESABIM
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                {% if session.get('rol') in ['admin', 'yazar'] %}
+                                    <li><a class="dropdown-item fw-bold" href="{{ url_for('yeni_yazi') }}"><i class="fas fa-pen-nib me-2"></i>Yazı Yaz</a></li>
+                                {% endif %}
+                                {% if session.get('rol') == 'admin' %}
+                                    <li><a class="dropdown-item fw-bold text-primary" href="{{ url_for('admin_panel') }}"><i class="fas fa-shield-alt me-2"></i>Admin Paneli</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('profil_duzenle') }}"><i class="fas fa-user-edit me-2"></i>Profili Düzenle</a></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('cikis') }}"><i class="fas fa-sign-out-alt me-2"></i>Çıkış</a></li>
+                            </ul>
                         </li>
-
-                        <li class="nav-item"><a class="nav-link" href="/hakkimizda">Hakkımızda</a></li>
-                        
-                        <li class="nav-item"><a class="nav-link" href="/iletisim">İletişim</a></li>
-
-                        {% if session.get('giris_yapildi') %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                    👤 Hesabım
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow" style="background-color: #F8F8F4;">
-                                    <li><a class="dropdown-item" href="/profil-duzenle">Profil Düzenle</a></li>
-                                    
-                                    {% if session.get('rol') == 'admin' %}
-                                        <li><a class="dropdown-item fw-bold text-primary" href="/admin">⚙️ Admin Paneli</a></li>
-                                    {% endif %}
-                                    
-                                    {% if session.get('rol') == 'admin' or session.get('rol') == 'yazar' %}
-                                        <li><a class="dropdown-item" href="/yeni">✍️ Yazı Yaz</a></li>
-                                    {% endif %}
-                                    
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="/cikis">Çıkış Yap</a></li>
-                                </ul>
-                            </li>
-                        {% else %}
-                            <li class="nav-item"><a class="nav-link" href="/giris">Giriş</a></li>
-                        {% endif %}
-                    </ul>
-
-                </div>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('giris') }}"><i class="fas fa-sign-in-alt me-1"></i>GİRİŞ</a></li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
@@ -107,33 +77,13 @@
         {% block content %}{% endblock %}
     </div>
 
-    <div class="footer text-center">
+    <div class="footer text-center mt-5 py-4" style="background: #f9f7f2; border-top: 1px solid #dcd6cc;">
         <div class="container">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" height="50" class="mb-3 opacity-75">
-            
             <p class="mb-1 fw-bold fs-5">PROMETHEON</p>
-            <p class="small text-muted mb-4">Verilerle konuşur, sanatla düşünürüm.</p>
-            
-            <div class="mb-4 social-icons">
-                <a href="https://twitter.com/prometheon_dergi" target="_blank" class="mx-2"><i class="fab fa-twitter fa-lg"></i></a>
-                <a href="https://instagram.com/prometheon_dergi" target="_blank" class="mx-2"><i class="fab fa-instagram fa-lg"></i></a>
-                <a href="https://linkedin.com/in/omerfarukbilgic" target="_blank" class="mx-2"><i class="fab fa-linkedin fa-lg"></i></a>
-                <a href="mailto:iletisim@prometheon.com" class="mx-2"><i class="fas fa-envelope fa-lg"></i></a>
+            <p class="small text-muted mb-4">Verilerle konuşur, sanatla düşünürüz.</p>
+            <div class="mb-3 text-muted">
+                &copy; 2025 Tüm Hakları Saklıdır.
             </div>
-            
-            <div class="border-top pt-3 mt-3 w-50 mx-auto" style="border-color: #d1c7b7 !important;">
-                <p class="small text-muted mb-1">&copy; 2025 Prometheon. Tüm hakları saklıdır.</p>
-                
-                <p class="small text-muted mt-2" style="font-size: 0.8rem; letter-spacing: 0.5px; font-family: 'Georgia', serif; font-style: italic;">
-                    Designed & Coded by 
-                    <a href="https://github.com/omerfarukbilgic" target="_blank" class="text-decoration-none" style="color: #4B5320; font-weight: bold;">
-                        Ömer Faruk Bilgiç
-                    </a>
-                </p>
-                    </a>
-                </p>
-            </div>
-
         </div>
     </div>
 

@@ -6,15 +6,20 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-10 offset-md-1">
-            <h2 class="mb-4">✍️ Yeni Yazı Oluştur</h2>
+            <h2 class="mb-4">Yeni Bir Şeyler Karala</h2>
             
             <form method="post" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label fw-bold">Başlık</label>
-                    <input type="text" name="baslik" class="form-control form-control-lg" placeholder="Başlık gir..." required>
+                    <input type="text" name="baslik" class="form-control" placeholder="Çarpıcı bir başlık..." required>
                 </div>
 
                 <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Kapak Görseli</label>
+                        <input type="file" name="resim" class="form-control">
+                        <small class="text-muted">Bilgisayarından bir resim seç.</small>
+                    </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Kategori</label>
                         <select name="kategori" class="form-select">
@@ -25,19 +30,18 @@
                             <option value="Ekonomi">Ekonomi</option>
                         </select>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Kapak Resmi</label>
-                        <input type="file" name="resim" class="form-control">
-                    </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">İçerik (Resim eklemek için araç çubuğunu kullan)</label>
+                    <label class="form-label fw-bold">İçerik</label>
                     <textarea name="icerik" id="editor"></textarea>
+                    <div class="form-text mt-2">
+                        💡 Resim eklemek için editördeki <b>Resim İkonuna</b> tıkla, <b>Karşıya Yükle</b> sekmesinden fotoğrafını seç ve <b>Sunucuya Gönder</b> de. Kodla uğraşmak yok!
+                    </div>
                 </div>
 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-dark btn-lg">Yayımla</button>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-dark btn-lg">Yayınla (veya Onaya Gönder)</button>
                 </div>
             </form>
         </div>
