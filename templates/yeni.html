@@ -1,7 +1,13 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<style>
+    .ck-editor__editable_inline {
+        min-height: 400px;
+    }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-md-10">
         <h2 class="mb-4 fw-bold">✍️ Yeni Yazı Oluştur</h2>
@@ -32,7 +38,9 @@
             <div class="mb-4">
                 <label class="fw-bold">İçerik</label>
                 <textarea name="icerik" id="editor"></textarea>
-                <small class="text-muted">💡 Resim eklemek için araç çubuğundaki <b>Resim İkonuna</b> tıkla, <b>Karşıya Yükle</b> sekmesinden seç ve <b>Sunucuya Gönder</b> de.</small>
+                <small class="text-muted">
+                    💡 Resim eklemek için metne resim ikonundan veya direkt sürükleyip bırakarak dosya seçebilirsin.
+                </small>
             </div>
 
             <button type="submit" class="btn btn-dark btn-lg w-100">Yayımla</button>
@@ -41,10 +49,14 @@
 </div>
 
 <script>
-    CKEDITOR.replace('editor', {
-        height: 400,
-        filebrowserUploadUrl: '/upload',
-        filebrowserUploadMethod: 'form'
-    });
+ClassicEditor
+    .create( document.querySelector( '#editor' ), {
+        simpleUpload: {
+            uploadUrl: '/upload'
+        }
+    } )
+    .catch( error => {
+        console.error( error );
+    } );
 </script>
 {% endblock %}
