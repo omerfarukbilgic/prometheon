@@ -14,20 +14,24 @@
                             Kullanıcı bilgisi bulunamadı.
                         </div>
                     {% else %}
-                        <form method="post">
-                            <div class="mb-3">
-                                <label>Ad Soyad</label>
-                                <input type="text" name="ad_soyad" class="form-control"
-                                       value="{{ user['ad_soyad'] }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label>Biyografi (Kendini Tanıt)</label>
-                                <textarea name="biyografi" class="form-control" rows="4">
-{{ user['biyografi'] }}
-                                </textarea>
-                            </div>
-                            <button type="submit" class="btn btn-dark w-100">Kaydet</button>
-                        </form>
+                        <form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label>Ad Soyad</label>
+        <input type="text" name="ad_soyad" class="form-control" value="{{ user['ad_soyad'] }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Biyografi (Kendini Tanıt)</label>
+        <textarea name="biyografi" class="form-control" rows="4">{{ user['biyografi'] }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label>Profil Fotoğrafı</label>
+        <input type="file" name="profil_resmi" class="form-control">
+        {% if user['profil_resmi'] %}
+            <small class="text-muted d-block mt-1">Mevcut: {{ user['profil_resmi'] }}</small>
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-dark w-100">Kaydet</button>
+</form>
                     {% endif %}
                 </div>
             </div>

@@ -14,8 +14,8 @@
             
             <div class="mx-auto mb-3" style="width: 120px; height: 120px; overflow: hidden; border-radius: 50%; border: 3px solid #E3DAC9;">
                 {% if yazar['profil_resmi'] %}
-                    <img src="{{ yazar['profil_resmi'] }}" class="img-fluid" style="height: 100%; object-fit: cover;">
-                {% else %}
+    <img src="{{ url_for('static', filename='uploads/' + yazar['profil_resmi']) }}" class="img-fluid" style="height: 100%; object-fit: cover;">
+{% else %}
                     <img src="https://ui-avatars.com/api/?name={{ yazar['ad_soyad'] }}&background=556B2F&color=fff&size=200" class="img-fluid">
                 {% endif %}
             </div>
@@ -31,7 +31,7 @@
                     {{ yazar['biyografi'] }}
                 </p>
                 
-                <a href="/yazar/{{ yazar['id'] }}" class="btn btn-outline-dark btn-sm mt-3 px-4 rounded-pill">Tüm Yazıları</a>
+                <a href="{{ url_for('yazar_profili', id=yazar['id']) }}" class="btn btn-outline-dark btn-sm mt-3 px-4 rounded-pill">Tüm Yazıları</a>
             </div>
         </div>
     </div>

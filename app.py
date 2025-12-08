@@ -222,29 +222,31 @@ def profil_duzenle():
         return redirect(url_for('giris'))
 
     conn = db_baglantisi_kur()
-
     if request.method == 'POST':
         ad_soyad = request.form['ad_soyad']
         biyografi = request.form['biyografi']
+        profil_resmi_dosya = request.files.get('profil_resmi')
 
-        conn.execute(
-            "UPDATE users SET ad_soyad=?, biyografi=? WHERE id=?",
-            (ad_soyad, biyografi, session['user_id'])
-        )
+        if profil_resmi_dosya and profil_resmi_dosya.filename:
+            dosya_adi = secure_filename(profil_resmi_dosya.filename)
+            profil_resmi_dosya.save(os.path.join(app.config['UPLOAD_FOLDER'], dosya_adi))
+            conn.execute(
+                "UPDATE users SET ad_soyad=?, biyografi=?, profil_resmi=? WHERE id=?",
+                (ad_soyad, biyografi, dosya_adi, session['user_id'])
+            )
+        else:
+            conn.execute(
+                "UPDATE users SET ad_soyad=?, biyografi=? WHERE id=?",
+                (ad_soyad, biyografi, session['user_id'])
+            )
+
         conn.commit()
         session['ad_soyad'] = ad_soyad
         conn.close()
         return redirect(url_for('anasayfa'))
 
-    user = conn.execute(
-        "SELECT * FROM users WHERE id = ?",
-        (session['user_id'],)
-    ).fetchone()
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],)).fetchone()
     conn.close()
-
-    if user is None:
-        abort(404)
-
     return render_template('profil_duzenle.html', user=user)
 
 @app.route('/yazarlar')
@@ -504,6 +506,22 @@ def tamir_et():
 
     conn.close()
     return "<br>".join(mesaj)
+
+from flask import Flask, render_template, request, url_for, redirect, session, jsonify, abort
+@app.route('/yazar/<int:id>')
+def yazar_profili(id):
+    conn = db_baglantisi_kur()
+    yazar = conn.execute("SELECT * FROM users WHERE id=?", (id,)).fetchone()
+    if yazar is None:
+        conn.close()
+        abort(404)
+
+    yazilar = conn.execute(
+        "SELECT * FROM yazilar WHERE author_id=? AND durum=1 ORDER BY id DESC",
+        (id,)
+    ).fetchall()
+    conn.close()
+    return render_template('yazar_detay.html', yazar=yazar, yazilar=yazilar)
 
 if __name__ == "__main__":
     app.run(debug=True)
