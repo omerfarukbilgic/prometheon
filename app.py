@@ -29,6 +29,7 @@ def okuma_suresi_hesapla(metin):
     return f"{dakika} dk"
 
 # --- ROTALAR ---
+
 @app.route("/")
 def anasayfa():
     conn = db_baglantisi_kur()
@@ -54,6 +55,15 @@ def detay(id):
     
     conn.close()
     return render_template('detay.html', yazi=yazi, yorumlar=yorumlar)
+
+# --- İŞTE EKSİK OLAN FONKSİYON (BU YÜZDEN HATA VERİYORDU) ---
+@app.route('/kategori/<isim>')
+def kategori_sayfasi(isim):
+    conn = db_baglantisi_kur()
+    yazilar = conn.execute('SELECT * FROM yazilar WHERE kategori = ? AND durum = 1 ORDER BY id DESC', (isim,)).fetchall()
+    conn.close()
+    return render_template("index.html", posts=yazilar)
+# -----------------------------------------------------------
 
 @app.route("/yeni", methods=('GET', 'POST'))
 def yeni_yazi():
@@ -109,7 +119,7 @@ def duzenle(id):
     conn.close()
     return render_template('duzenle.html', yazi=yazi)
 
-# --- RESİM YÜKLEME SERVİSİ (Upload) ---
+# --- CKEDITOR RESİM YÜKLEME ---
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'upload' not in request.files:
@@ -120,7 +130,7 @@ def upload_file():
     url = url_for('static', filename='uploads/' + filename)
     return jsonify({'uploaded': 1, 'fileName': filename, 'url': url})
 
-# --- GALERİ SAYFASI ---
+# --- GALERİ ---
 @app.route('/admin/galeri', methods=('GET', 'POST'))
 def galeri():
     if session.get('rol') not in ['admin', 'yazar']: return "Yetkiniz yok", 403
@@ -137,7 +147,7 @@ def galeri():
     except: pass
     return render_template('galeri.html', resimler=resimler, mesaj=mesaj)
 
-# --- DİĞER ROTALAR (Giriş, Kayıt, Admin vb.) ---
+# --- DİĞER STANDART SAYFALAR ---
 @app.route("/giris", methods=('GET', 'POST'))
 def giris():
     if request.method == 'POST':
@@ -195,7 +205,6 @@ def hakkimizda(): return render_template('hakkimizda.html')
 @app.route('/iletisim')
 def iletisim(): return render_template('iletisim.html')
 
-# --- TAMİR ROTASI ---
 @app.route('/tamir')
 def tamir_et():
     conn = db_baglantisi_kur(); mesaj = []
@@ -204,8 +213,6 @@ def tamir_et():
     try: conn.execute("ALTER TABLE yazilar ADD COLUMN goruntulenme INTEGER DEFAULT 0"); conn.commit(); mesaj.append("✅ İzlenme OK")
     except: pass
     try: conn.execute("ALTER TABLE users ADD COLUMN profil_resmi TEXT"); conn.commit(); mesaj.append("✅ Profil OK")
-    except: pass
-    try: conn.execute("ALTER TABLE users ADD COLUMN biyografi TEXT"); conn.commit(); mesaj.append("✅ Biyo OK")
     except: pass
     conn.close(); return "<br>".join(mesaj)
 
