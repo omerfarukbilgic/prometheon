@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = 'cok_gizli_anahtar_buraya'
+app.secret_key = 'cok_gizli_anahtar'
 
 # --- AYARLAR ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -21,15 +21,11 @@ def db_baglantisi_kur():
 
 # --- FİLTRELER ---
 @app.template_filter('okuma_suresi')
-def okuma_suresi_hesapla(metin):
+def okuma_suresi(metin):
     if not metin: return "1 dk"
-    kelime_sayisi = len(metin.split())
-    dakika = int(kelime_sayisi / 200)
-    if dakika == 0: return "1 dk"
-    return f"{dakika} dk"
+    return f"{max(1, int(len(metin.split()) / 200))} dk"
 
 # --- ROTALAR ---
-
 @app.route("/")
 def anasayfa():
     conn = db_baglantisi_kur()
@@ -44,41 +40,27 @@ def detay(id):
         conn.execute('UPDATE yazilar SET goruntulenme = goruntulenme + 1 WHERE id = ?', (id,))
         conn.commit()
     except: pass
-
-    sorgu = "SELECT yazilar.*, users.ad_soyad, users.profil_resmi, users.biyografi FROM yazilar JOIN users ON yazilar.author_id = users.id WHERE yazilar.id = ?"
-    yazi = conn.execute(sorgu, (id,)).fetchone()
     
+    yazi = conn.execute("SELECT yazilar.*, users.ad_soyad, users.profil_resmi, users.biyografi FROM yazilar JOIN users ON yazilar.author_id = users.id WHERE yazilar.id = ?", (id,)).fetchone()
     try:
         yorumlar = conn.execute("SELECT yorumlar.*, users.ad_soyad FROM yorumlar JOIN users ON yorumlar.user_id = users.id WHERE post_id = ? ORDER BY id DESC", (id,)).fetchall()
-    except:
-        yorumlar = []
+    except: yorumlar = []
     
     conn.close()
     return render_template('detay.html', yazi=yazi, yorumlar=yorumlar)
 
-# --- İŞTE EKSİK OLAN FONKSİYON (BU YÜZDEN HATA VERİYORDU) ---
-@app.route('/kategori/<isim>')
-def kategori_sayfasi(isim):
-    conn = db_baglantisi_kur()
-    yazilar = conn.execute('SELECT * FROM yazilar WHERE kategori = ? AND durum = 1 ORDER BY id DESC', (isim,)).fetchall()
-    conn.close()
-    return render_template("index.html", posts=yazilar)
-# -----------------------------------------------------------
-
 @app.route("/yeni", methods=('GET', 'POST'))
 def yeni_yazi():
-    if session.get('rol') not in ['admin', 'yazar']: return "Yetkiniz yok", 403
+    if session.get('rol') not in ['admin', 'yazar']: return "Yetkisiz", 403
     if request.method == 'POST':
         baslik = request.form['baslik']
         icerik = request.form['icerik']
         kategori = request.form['kategori']
-        
-        resim_dosyasi = request.files.get('resim')
-        resim_adi = "" 
-        if resim_dosyasi and resim_dosyasi.filename != '':
-            dosya_adi = secure_filename(resim_dosyasi.filename)
-            resim_dosyasi.save(os.path.join(app.config['UPLOAD_FOLDER'], dosya_adi))
-            resim_adi = dosya_adi
+        resim = request.files.get('resim')
+        resim_adi = ""
+        if resim and resim.filename:
+            resim_adi = secure_filename(resim.filename)
+            resim.save(os.path.join(app.config['UPLOAD_FOLDER'], resim_adi))
             
         durum = 1 if session['rol'] == 'admin' else 0
         conn = db_baglantisi_kur()
@@ -94,80 +76,97 @@ def duzenle(id):
     if not session.get('giris_yapildi'): return redirect(url_for('giris'))
     conn = db_baglantisi_kur()
     yazi = conn.execute('SELECT * FROM yazilar WHERE id = ?', (id,)).fetchone()
-    
     if session['rol'] != 'admin' and session['user_id'] != yazi['author_id']:
         conn.close()
-        return "Yetkiniz yok", 403
-
+        return "Yetkisiz", 403
     if request.method == 'POST':
         baslik = request.form['baslik']
         icerik = request.form['icerik']
         kategori = request.form['kategori']
-        
-        resim_dosyasi = request.files.get('resim')
-        if resim_dosyasi and resim_dosyasi.filename != '':
-            dosya_adi = secure_filename(resim_dosyasi.filename)
-            resim_dosyasi.save(os.path.join(app.config['UPLOAD_FOLDER'], dosya_adi))
-            conn.execute('UPDATE yazilar SET baslik=?, icerik=?, kategori=?, resim=? WHERE id=?', (baslik, icerik, kategori, dosya_adi, id))
+        resim = request.files.get('resim')
+        if resim and resim.filename:
+            dosya = secure_filename(resim.filename)
+            resim.save(os.path.join(app.config['UPLOAD_FOLDER'], dosya))
+            conn.execute('UPDATE yazilar SET baslik=?, icerik=?, kategori=?, resim=? WHERE id=?', (baslik, icerik, kategori, dosya, id))
         else:
             conn.execute('UPDATE yazilar SET baslik=?, icerik=?, kategori=? WHERE id=?', (baslik, icerik, kategori, id))
-            
         conn.commit()
         conn.close()
         return redirect(url_for('detay', id=id))
-        
     conn.close()
     return render_template('duzenle.html', yazi=yazi)
 
-# --- CKEDITOR RESİM YÜKLEME ---
+# --- PROFIL DÜZENLEME (Bu eksikti, 404 veriyordu) ---
+@app.route('/profil-duzenle', methods=('GET', 'POST'))
+def profil_duzenle():
+    if not session.get('giris_yapildi'): return redirect(url_for('giris'))
+    conn = db_baglantisi_kur()
+    if request.method == 'POST':
+        ad_soyad = request.form['ad_soyad']
+        biyografi = request.form['biyografi']
+        # Basitlik için şimdilik resim yüklemeyi atladık, sadece metin
+        conn.execute("UPDATE users SET ad_soyad=?, biyografi=? WHERE id=?", (ad_soyad, biyografi, session['user_id']))
+        conn.commit()
+        session['ad_soyad'] = ad_soyad
+        conn.close()
+        return redirect(url_for('anasayfa'))
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],)).fetchone()
+    conn.close()
+    return render_template('profil_duzenle.html', user=user)
+
+# --- RESİM YÜKLEME SERVİSİ (CKEditor İçin) ---
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'upload' not in request.files:
-        return jsonify({'error': {'message': 'Dosya yok'}}), 400
+    if 'upload' not in request.files: return jsonify({'error': 'Dosya yok'})
     f = request.files['upload']
-    filename = secure_filename(f.filename)
-    f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    url = url_for('static', filename='uploads/' + filename)
-    return jsonify({'uploaded': 1, 'fileName': filename, 'url': url})
+    fname = secure_filename(f.filename)
+    f.save(os.path.join(app.config['UPLOAD_FOLDER'], fname))
+    return jsonify({'uploaded': 1, 'fileName': fname, 'url': url_for('static', filename='uploads/' + fname)})
 
-# --- GALERİ ---
+# --- KATEGORİLER VE YAZARLAR ---
+@app.route('/kategori/<isim>')
+def kategori_sayfasi(isim):
+    conn = db_baglantisi_kur()
+    yazilar = conn.execute('SELECT * FROM yazilar WHERE kategori = ? AND durum = 1 ORDER BY id DESC', (isim,)).fetchall()
+    conn.close()
+    return render_template("index.html", posts=yazilar)
+
+@app.route('/yazarlar')
+def yazarlar_sayfasi():
+    conn = db_baglantisi_kur()
+    yazarlar = conn.execute("SELECT * FROM users WHERE rol IN ('admin', 'yazar')").fetchall()
+    conn.close()
+    return render_template("yazarlar.html", yazarlar=yazarlar)
+
 @app.route('/admin/galeri', methods=('GET', 'POST'))
 def galeri():
-    if session.get('rol') not in ['admin', 'yazar']: return "Yetkiniz yok", 403
+    if session.get('rol') not in ['admin', 'yazar']: return "Yetkisiz", 403
     mesaj = ""
     if request.method == 'POST':
         files = request.files.getlist('dosyalar')
-        for file in files:
-            if file and file.filename != '':
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        mesaj = "Resimler yüklendi!"
-    resimler = []
+        for f in files:
+            if f.filename: f.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
+        mesaj = "Yüklendi"
     try: resimler = os.listdir(app.config['UPLOAD_FOLDER'])
-    except: pass
+    except: resimler = []
     return render_template('galeri.html', resimler=resimler, mesaj=mesaj)
 
-# --- DİĞER STANDART SAYFALAR ---
+# STANDARTLAR
 @app.route("/giris", methods=('GET', 'POST'))
 def giris():
     if request.method == 'POST':
         email = request.form['email']; sifre = request.form['sifre']
-        conn = db_baglantisi_kur(); user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone(); conn.close()
+        conn = db_baglantisi_kur(); user = conn.execute('SELECT * FROM users WHERE email=?', (email,)).fetchone(); conn.close()
         if user and check_password_hash(user['sifre'], sifre):
             session['user_id'] = user['id']; session['ad_soyad'] = user['ad_soyad']; session['rol'] = user['rol']; session['giris_yapildi'] = True
-            return redirect(url_for('admin_panel' if user['rol'] == 'admin' else 'anasayfa'))
-        else: return render_template('giris.html', hata="Hatalı bilgi!")
+            return redirect(url_for('admin_panel' if user['rol']=='admin' else 'anasayfa'))
     return render_template('giris.html')
 
 @app.route("/kayit", methods=('GET', 'POST'))
 def kayit():
     if request.method == 'POST':
-        try:
-            conn = db_baglantisi_kur()
-            conn.execute('INSERT INTO users (ad_soyad, email, sifre) VALUES (?, ?, ?)', (request.form['ad_soyad'], request.form['email'], generate_password_hash(request.form['sifre'])))
-            conn.commit(); conn.close()
-            return redirect(url_for('giris'))
-        except: return render_template('kayit.html', hata="Kayıtlı!")
+        try: conn = db_baglantisi_kur(); conn.execute('INSERT INTO users (ad_soyad, email, sifre) VALUES (?,?,?)', (request.form['ad_soyad'], request.form['email'], generate_password_hash(request.form['sifre']))); conn.commit(); conn.close(); return redirect(url_for('giris'))
+        except: pass
     return render_template('kayit.html')
 
 @app.route("/cikis")
@@ -177,27 +176,20 @@ def cikis(): session.clear(); return redirect(url_for('anasayfa'))
 def admin_panel():
     if session.get('rol') != 'admin': return "Yetkisiz", 403
     conn = db_baglantisi_kur()
-    bekleyenler = conn.execute("SELECT * FROM yazilar WHERE durum = 0").fetchall()
+    bekleyenler = conn.execute("SELECT * FROM yazilar WHERE durum=0").fetchall()
+    conn.close()
     return render_template("admin.html", bekleyenler=bekleyenler)
 
 @app.route("/admin/onayla/<int:id>", methods=('POST',))
 def onayla(id):
-    if session.get('rol') == 'admin':
-        conn = db_baglantisi_kur(); conn.execute("UPDATE yazilar SET durum = 1 WHERE id = ?", (id,)); conn.commit(); conn.close()
+    if session.get('rol') == 'admin': conn = db_baglantisi_kur(); conn.execute("UPDATE yazilar SET durum=1 WHERE id=?",(id,)); conn.commit(); conn.close()
     return redirect(url_for('admin_panel'))
 
 @app.route('/<int:id>/sil', methods=('POST',))
 def sil(id):
     if not session.get('giris_yapildi'): return redirect(url_for('giris'))
-    conn = db_baglantisi_kur(); conn.execute('DELETE FROM yazilar WHERE id = ?', (id,)); conn.commit(); conn.close()
+    conn = db_baglantisi_kur(); conn.execute("DELETE FROM yazilar WHERE id=?",(id,)); conn.commit(); conn.close()
     return redirect(url_for('anasayfa'))
-
-@app.route('/yazarlar')
-def yazarlar_sayfasi():
-    conn = db_baglantisi_kur()
-    yazarlar = conn.execute("SELECT * FROM users WHERE rol IN ('admin', 'yazar')").fetchall()
-    conn.close()
-    return render_template("yazarlar.html", yazarlar=yazarlar)
 
 @app.route('/hakkimizda')
 def hakkimizda(): return render_template('hakkimizda.html')
@@ -213,6 +205,8 @@ def tamir_et():
     try: conn.execute("ALTER TABLE yazilar ADD COLUMN goruntulenme INTEGER DEFAULT 0"); conn.commit(); mesaj.append("✅ İzlenme OK")
     except: pass
     try: conn.execute("ALTER TABLE users ADD COLUMN profil_resmi TEXT"); conn.commit(); mesaj.append("✅ Profil OK")
+    except: pass
+    try: conn.execute("ALTER TABLE users ADD COLUMN biyografi TEXT"); conn.commit(); mesaj.append("✅ Biyo OK")
     except: pass
     conn.close(); return "<br>".join(mesaj)
 

@@ -1,50 +1,55 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow border-0 p-5 mt-4">
-            <h2 class="mb-4 fw-bold text-center">Yeni Bir Şeyler Karala</h2>
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <h2 class="mb-4">✍️ Yeni Yazı Oluştur</h2>
             
             <form method="post" enctype="multipart/form-data">
-                
                 <div class="mb-3">
-                    <label class="form-label">Başlık</label>
-                    <input type="text" name="baslik" class="form-control" placeholder="Çarpıcı bir başlık..." required>
+                    <label class="form-label fw-bold">Başlık</label>
+                    <input type="text" name="baslik" class="form-control form-control-lg" placeholder="Başlık gir..." required>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Kapak Görseli</label>
-                    <input type="file" name="resim" class="form-control" accept="image/*">
-                    <small class="text-muted">Bilgisayarından bir resim seç.</small>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Kategori</label>
-                    <select name="kategori" class="form-select">
-                        <option value="Ekonomi">Ekonomi</option>
-                        <option value="Felsefe">Felsefe</option>
-                        <option value="Siyaset">Siyaset</option>
-                        <option value="Hukuk">Hukuk</option>
-                        <option value="Edebiyat">Edebiyat</option>
-                    </select>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Kategori</label>
+                        <select name="kategori" class="form-select">
+                            <option value="Politika">Politika</option>
+                            <option value="Hukuk">Hukuk</option>
+                            <option value="Felsefe">Felsefe</option>
+                            <option value="Sanat">Sanat</option>
+                            <option value="Ekonomi">Ekonomi</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Kapak Resmi</label>
+                        <input type="file" name="resim" class="form-control">
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-    <label class="form-label fw-bold mb-0">İçerik</label>
-    <a href="{{ url_for('galeri') }}" target="_blank" class="btn btn-outline-primary btn-sm">
-        <i class="fas fa-images me-1"></i> 📸 Resim Deposunu (Galeriyi) Aç
-    </a>
-</div>
-                    <textarea name="icerik" class="form-control" rows="12" placeholder="Düşüncelerini buraya dök..." required></textarea>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">İçerik (Resim eklemek için araç çubuğunu kullan)</label>
+                    <textarea name="icerik" id="editor"></textarea>
                 </div>
-                
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-dark py-2">Yayınla (veya Onaya Gönder)</button>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-dark btn-lg">Yayımla</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    CKEDITOR.replace('editor', {
+        height: 400,
+        filebrowserUploadUrl: '/upload',
+        filebrowserUploadMethod: 'form',
+        removeButtons: 'Source,Save,NewPage,Preview,Print,Templates,Cut,Copy,Paste,PasteText,PasteFromWord,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,CreateDiv,BidiLtr,BidiRtl,Language,Anchor,Flash,Smiley,PageBreak,Iframe,About'
+    });
+</script>
 {% endblock %}

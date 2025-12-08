@@ -1,31 +1,27 @@
 {% extends "layout.html" %}
 
-{% block icerik %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm border-0 p-4">
-            <h2 class="mb-4 fw-bold">Profilini Düzenle</h2>
-            
-            <form method="post">
-                <div class="mb-3">
-                    <label class="form-label">Ad Soyad</label>
-                    <input type="text" name="ad_soyad" class="form-control" value="{{ user['ad_soyad'] }}" required>
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    Profil Düzenle
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Profil Resmi (Link)</label>
-                    <input type="text" name="profil_resmi" class="form-control" value="{{ user['profil_resmi'] }}" placeholder="Örn: https://i.imgur.com/...">
-                    <small class="text-muted">Şimdilik internetteki bir resim linkini yapıştırabilirsin.</small>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label>Ad Soyad</label>
+                            <input type="text" name="ad_soyad" class="form-control" value="{{ user['ad_soyad'] }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Biyografi (Kendini Tanıt)</label>
+                            <textarea name="biyografi" class="form-control" rows="4">{{ user['biyografi'] }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100">Kaydet</button>
+                    </form>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Biyografi</label>
-                    <textarea name="biyografi" class="form-control" rows="5">{{ user['biyografi'] }}</textarea>
-                </div>
-
-                <button type="submit" class="btn btn-dark">Kaydet</button>
-                <a href="/yazarlar" class="btn btn-outline-secondary">İptal</a>
-            </form>
+            </div>
         </div>
     </div>
 </div>
