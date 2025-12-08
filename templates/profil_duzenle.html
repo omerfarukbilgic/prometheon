@@ -9,17 +9,26 @@
                     Profil Düzenle
                 </div>
                 <div class="card-body">
-                    <form method="post">
-                        <div class="mb-3">
-                            <label>Ad Soyad</label>
-                            <input type="text" name="ad_soyad" class="form-control" value="{{ user['ad_soyad'] }}" required>
+                    {% if not user %}
+                        <div class="alert alert-danger">
+                            Kullanıcı bilgisi bulunamadı.
                         </div>
-                        <div class="mb-3">
-                            <label>Biyografi (Kendini Tanıt)</label>
-                            <textarea name="biyografi" class="form-control" rows="4">{{ user['biyografi'] }}</textarea>
-                        </div>
-                        <button type="submit" class="btn btn-dark w-100">Kaydet</button>
-                    </form>
+                    {% else %}
+                        <form method="post">
+                            <div class="mb-3">
+                                <label>Ad Soyad</label>
+                                <input type="text" name="ad_soyad" class="form-control"
+                                       value="{{ user['ad_soyad'] }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Biyografi (Kendini Tanıt)</label>
+                                <textarea name="biyografi" class="form-control" rows="4">
+{{ user['biyografi'] }}
+                                </textarea>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100">Kaydet</button>
+                        </form>
+                    {% endif %}
                 </div>
             </div>
         </div>
