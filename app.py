@@ -416,8 +416,13 @@ def upload_file():
 
     file_url = url_for('static', filename='uploads/' + fname)
 
-    # CKEditor 5 simpleUpload JSON formatı
-    return jsonify({'url': file_url})
+    # Hem "url" hem de "urls.default" döndürüyoruz
+    return jsonify({
+        'url': file_url,
+        'urls': {
+            'default': file_url
+        }
+    })
 
     # Editöre "şu URL’yi ekle" diye JS döndürüyoruz
     return f"<script>window.parent.CKEDITOR.tools.callFunction({callback}, '{file_url}', '');</script>"
