@@ -1,54 +1,34 @@
 {% extends "layout.html" %}
 
-{% block icerik %}
-<div class="text-center py-5 mb-4">
-    <h1 class="display-3 mb-3">Prometheon</h1>
-    
-    <p class="lead text-muted fst-italic">"Verilerle konuşur, sanatla düşünürüm."</p>
-    
-    <div style="width: 80px; height: 4px; background-color: #556B2F; margin: 30px auto; border-radius: 2px;"></div>
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center mb-5">
+        <h1 class="display-4 font-italic">Son Yazılar</h1>
+        <p class="lead text-muted">Verilerle konuşur, sanatla düşünürüz.</p>
+        <hr class="w-25 mx-auto">
+    </div>
 </div>
 
 <div class="row">
     {% for yazi in posts %}
-    <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <a href="/{{ yazi['id'] }}" class="card-img-wrapper d-block mb-3">
-                
-                {% if yazi['resim'] %}
-                    <img src="{{ url_for('static', filename='uploads/' + yazi['resim']) }}" class="card-img-top w-100" alt="Kapak" style="height: 240px; object-fit: cover;">
-                {% else %}
-                    <img src="https://picsum.photos/seed/{{ yazi['id'] }}/800/500" class="card-img-top w-100" alt="Kapak" style="height: 240px; object-fit: cover;">
-                {% endif %}
-                
-            </a>
-            
-            <div class="card-body p-0">
-                <a href="/kategori/{{ yazi['kategori'] }}" class="kategori-badge">{{ yazi['kategori'] }}</a>
-                
-                <h3 class="card-title">
-                    <a href="/{{ yazi['id'] }}" class="text-dark">{{ yazi['baslik'] }}</a>
-                </h3>
-                
-                <p class="card-text text-muted">
-                    {{ yazi['icerik'][0:120] }}...
-                </p>
-                
-               <div class="d-flex justify-content-between align-items-center mt-3">
-                    <small class="text-muted" style="font-family: 'Inter', sans-serif; font-size: 0.8rem;">
-                        🗓 {{ yazi['tarih'] }} <small class="text-muted ms-3">
-    <i class="fas fa-eye"></i> {{ yazi['goruntulenme'] }}
-</small>
-                    </small>
-                    <small class="text-muted fw-bold" style="font-size: 0.75rem; color: #556B2F !important;">
-                        ⏱️ {{ yazi['icerik'] | okuma_suresi }} okuma
-                    </small>
-                </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            {% if yazi['resim'] %}
+                <img src="{{ url_for('static', filename='uploads/' + yazi['resim']) }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+            {% endif %}
+            <div class="card-body">
+                <small class="text-warning fw-bold text-uppercase">{{ yazi['kategori'] }}</small>
+                <h5 class="card-title mt-2"><a href="{{ url_for('detay', id=yazi['id']) }}" class="text-dark text-decoration-none">{{ yazi['baslik'] }}</a></h5>
+                <p class="card-text text-muted small">{{ yazi['icerik'] | striptags | truncate(100) }}</p>
+            </div>
+            <div class="card-footer bg-white border-0">
+                <a href="{{ url_for('detay', id=yazi['id']) }}" class="btn btn-outline-dark btn-sm w-100">Devamını Oku</a>
+            </div>
         </div>
     </div>
     {% else %}
-        <div class="col-12 text-center py-5">
-            <h4 class="text-muted">Henüz hiç yazı yok. İlk kıvılcımı sen çak! 🔥</h4>
+        <div class="col-12 text-center">
+            <p>Henüz hiç yazı yok. İlkini sen yaz!</p>
         </div>
     {% endfor %}
 </div>

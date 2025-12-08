@@ -1,36 +1,17 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow border-0">
-                <div class="card-body p-5">
-                    <h3 class="text-center mb-4 fw-bold">Giriş Yap</h3>
-                    
-                    {% if hata %}
-                        <div class="alert alert-danger">{{ hata }}</div>
-                    {% endif %}
-
-                    <form method="post">
-                        <div class="mb-3">
-                            <label class="form-label text-muted">E-posta Adresi</label>
-                            <input type="email" name="email" class="form-control form-control-lg" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Şifre</label>
-                            <input type="password" name="sifre" class="form-control form-control-lg" required>
-                        </div>
-                        <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-dark btn-lg">Giriş Yap</button>
-                        </div>
-                    </form>
-                    
-                    <div class="text-center">
-                        <small>Hesabın yok mu? <a href="{{ url_for('kayit') }}" class="fw-bold text-decoration-none">Kayıt Ol</a></small>
-                    </div>
-                </div>
-            </div>
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow p-4">
+            <h3 class="text-center mb-4">Giriş Yap</h3>
+            {% if hata %} <div class="alert alert-danger">{{ hata }}</div> {% endif %}
+            <form method="post">
+                <div class="mb-3"><label>E-posta</label><input type="email" name="email" class="form-control" required></div>
+                <div class="mb-3"><label>Şifre</label><input type="password" name="sifre" class="form-control" required></div>
+                <button type="submit" class="btn btn-dark w-100">Giriş</button>
+            </form>
+            <div class="text-center mt-3"><a href="{{ url_for('kayit') }}">Kayıt Ol</a></div>
         </div>
     </div>
 </div>

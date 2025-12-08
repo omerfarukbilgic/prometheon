@@ -3,48 +3,41 @@
 {% block content %}
 <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <h2 class="mb-4">Yeni Bir Şeyler Karala</h2>
-            
-            <form method="post" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Başlık</label>
-                    <input type="text" name="baslik" class="form-control" placeholder="Çarpıcı bir başlık..." required>
-                </div>
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <h2 class="mb-4 fw-bold">✍️ Yeni Yazı Oluştur</h2>
+        
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="fw-bold">Başlık</label>
+                <input type="text" name="baslik" class="form-control form-control-lg" placeholder="Başlık giriniz..." required>
+            </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Kapak Görseli</label>
-                        <input type="file" name="resim" class="form-control">
-                        <small class="text-muted">Bilgisayarından bir resim seç.</small>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Kategori</label>
-                        <select name="kategori" class="form-select">
-                            <option value="Politika">Politika</option>
-                            <option value="Hukuk">Hukuk</option>
-                            <option value="Felsefe">Felsefe</option>
-                            <option value="Sanat">Sanat</option>
-                            <option value="Ekonomi">Ekonomi</option>
-                        </select>
-                    </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="fw-bold">Kapak Resmi</label>
+                    <input type="file" name="resim" class="form-control">
                 </div>
+                <div class="col-md-6">
+                    <label class="fw-bold">Kategori</label>
+                    <select name="kategori" class="form-select">
+                        <option value="Politika">Politika</option>
+                        <option value="Hukuk">Hukuk</option>
+                        <option value="Felsefe">Felsefe</option>
+                        <option value="Sanat">Sanat</option>
+                        <option value="Ekonomi">Ekonomi</option>
+                    </select>
+                </div>
+            </div>
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold">İçerik</label>
-                    <textarea name="icerik" id="editor"></textarea>
-                    <div class="form-text mt-2">
-                        💡 Resim eklemek için editördeki <b>Resim İkonuna</b> tıkla, <b>Karşıya Yükle</b> sekmesinden fotoğrafını seç ve <b>Sunucuya Gönder</b> de. Kodla uğraşmak yok!
-                    </div>
-                </div>
+            <div class="mb-4">
+                <label class="fw-bold">İçerik</label>
+                <textarea name="icerik" id="editor"></textarea>
+                <small class="text-muted">💡 Resim eklemek için araç çubuğundaki <b>Resim İkonuna</b> tıkla, <b>Karşıya Yükle</b> sekmesinden seç ve <b>Sunucuya Gönder</b> de.</small>
+            </div>
 
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-dark btn-lg">Yayınla (veya Onaya Gönder)</button>
-                </div>
-            </form>
-        </div>
+            <button type="submit" class="btn btn-dark btn-lg w-100">Yayımla</button>
+        </form>
     </div>
 </div>
 
@@ -52,8 +45,7 @@
     CKEDITOR.replace('editor', {
         height: 400,
         filebrowserUploadUrl: '/upload',
-        filebrowserUploadMethod: 'form',
-        removeButtons: 'Source,Save,NewPage,Preview,Print,Templates,Cut,Copy,Paste,PasteText,PasteFromWord,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,CreateDiv,BidiLtr,BidiRtl,Language,Anchor,Flash,Smiley,PageBreak,Iframe,About'
+        filebrowserUploadMethod: 'form'
     });
 </script>
 {% endblock %}
