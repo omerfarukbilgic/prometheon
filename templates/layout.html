@@ -46,13 +46,11 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Kategoriler</a>
                             <ul class="dropdown-menu border-0 shadow" style="background-color: #F8F8F4;">
-                                <li><a class="dropdown-item" href="/kategori/Hukuk">⚖️ Hukuk</a></li>
-                                <li><a class="dropdown-item" href="/kategori/Felsefe">🤔 Felsefe</a></li>
-                                <li><a class="dropdown-item" href="/kategori/Siyaset">🏛️ Siyaset</a></li>
-                                <li><a class="dropdown-item" href="/kategori/Ekonomi">💰 Ekonomi</a></li>
-                                <li><a class="dropdown-item" href="/kategori/Edebiyat">📚 Edebiyat</a></li>
-                            </ul>
-                        </li>
+                                <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Politika') }}">Politika</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Hukuk') }}">Hukuk</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Felsefe') }}">Felsefe</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Sanat') }}">Sanat</a></li>
+</ul>
 
                         <li class="nav-item"><a class="nav-link" href="/yazarlar">Yazarlar</a></li>
                     </ul>
