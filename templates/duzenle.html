@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
-<style>
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script><style>
     .ck-editor__editable_inline {
         min-height: 400px;
     }
@@ -59,14 +58,11 @@
 </div>
 
 <script>
-ClassicEditor
-    .create( document.querySelector( '#editor' ), {
-        simpleUpload: {
-            uploadUrl: '/upload'
-        }
-    } )
-    .catch( error => {
-        console.error( error );
-    } );
+    CKEDITOR.replace('editor', {
+        height: 400,
+        filebrowserUploadUrl: '/upload',
+        filebrowserUploadMethod: 'form',
+        removeButtons: 'Source,Save,NewPage,Preview,Print,Templates,Cut,Copy,Paste,PasteText,PasteFromWord,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,CreateDiv,BidiLtr,BidiRtl,Language,Anchor,Flash,Smiley,PageBreak,Iframe,About'
+    });
 </script>
 {% endblock %}
