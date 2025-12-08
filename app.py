@@ -406,8 +406,24 @@ def kategori_sayfasi(isim):
 # --- CKEDITOR RESİM YÜKLEME ---
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    # CKEditor 4 image upload handler
     if 'upload' not in request.files:
-        return jsonify({'error': 'Dosya yok'})
+        return "No file part", 400
+
+    f = request.files['upload']
+    if f.filename == '':
+        return "No selected file", 400
+
+    fname = secure_filename(f.filename)
+    f.save(os.path.join(app.config['UPLOAD_FOLDER'], fname))
+
+    file_url = url_for('static', filename='uploads/' + fname)
+
+    # CKEditor 4, callback numarasını query string'de gönderiyor
+    callback = request.args.get('CKEditorFuncNum')
+
+    # Editöre "şu URL’yi ekle" diye JS döndürüyoruz
+    return f"<script>window.parent.CKEDITOR.tools.callFunction({callback}, '{file_url}', '');</script>"
 
     f = request.files['upload']
     fname = secure_filename(f.filename)
