@@ -40,6 +40,18 @@
             {% else %}
                 <p class="text-muted">Henüz yorum yok.</p>
             {% endfor %}
+            
+            {% if session.get('giris_yapildi') %}
+    {% if session.get('rol') == 'admin' or session.get('user_id') == yazi['author_id'] %}
+        <div class="mt-4 d-flex gap-2">
+            <a href="{{ url_for('duzenle', id=yazi['id']) }}" class="btn btn-warning">✏️ Düzenle</a>
+
+            <form action="{{ url_for('sil', id=yazi['id']) }}" method="post" onsubmit="return confirm('Silmek istediğine emin misin?');">
+                <button class="btn btn-danger">🗑️ Sil</button>
+            </form>
+        </div>
+    {% endif %}
+{% endif %}
         {% endif %}
     </div>
 </div>
