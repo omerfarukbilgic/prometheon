@@ -196,10 +196,12 @@
         {% block content %}{% endblock %}
     </div>
 
-   <div class="footer text-center">
+  <div class="footer text-center">
     <p class="mb-1">&copy; 2025 Prometheon – Düşünce Ateşi</p>
-    <p class="mb-0 small" style="color: #888; letter-spacing: 1px; font-style: italic;">
-        by ÖFB
+    <p class="mb-0 small" style="color: #888; letter-spacing: 1px; font-style: italic; margin-top: 4px;">
+        <a href="{{ url_for('yazar_profili', id=3) }}" style="color: #888; text-decoration: none;">
+            by ÖFB
+        </a>
     </p>
 </div>
 
