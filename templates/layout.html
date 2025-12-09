@@ -7,7 +7,7 @@
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -196,9 +196,21 @@
         {% block content %}{% endblock %}
     </div>
 
-    <div class="footer text-center">
-        <p class="mb-0">&copy; 2025 Prometheon - Düşünce Ateşi</p>
+   <div class="footer position-relative">
+    <p class="mb-1 text-center">&copy; 2025 Prometheon - Düşünce Ateşi</p>
+
+    <!-- Sağ Alt Köşe İmzası -->
+    <div class="imza position-absolute" style="
+        bottom: 10px;
+        right: 20px;
+        font-family: 'Dancing Script', cursive;
+        font-size: 1.4rem;
+        color: #e8e6e3;
+        opacity: 0.85;
+    ">
+        designed & created by Ömer Faruk BİLGİÇ
     </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
