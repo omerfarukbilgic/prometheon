@@ -4,16 +4,122 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Prometheon | Düşünce Ateşi</title>
+
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body { font-family: 'Merriweather', serif; background-color: #f8f9fa; color: #333; }
-        .navbar { background-color: #fff; border-bottom: 1px solid #ddd; padding: 1rem 0; }
-        .navbar-brand { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; letter-spacing: 1px; }
-        .nav-link { font-weight: 600; text-transform: uppercase; font-size: 0.9rem; color: #555 !important; }
-        .nav-link:hover { color: #000 !important; }
-        .footer { background: #222; color: #aaa; padding: 3rem 0; margin-top: 4rem; }
+        :root {
+            --primary: #4B5320;      /* haki yeşil */
+            --primary-light: #E3DAC9; /* krem */
+            --text-main: #111111;
+            --bg: #f7f5f0;
+        }
+
+        body {
+            font-family: 'Merriweather', serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            padding: 0.75rem 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            height: 34px;
+            margin-right: 8px;
+        }
+
+        .navbar-brand span.site-title {
+            margin-top: 2px;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: #555 !important;
+            letter-spacing: 0.06em;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus,
+        .nav-link.active {
+            color: var(--primary) !important;
+        }
+
+        .dropdown-menu {
+            border-radius: 0;
+            border-color: #ddd;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .navbar-toggler {
+            border: none;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0,0,0,0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* GENEL CONTAINER */
+        .main-container {
+            min-height: 600px;
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: #111;
+            color: #aaa;
+            padding: 2.5rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer a {
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: var(--primary-light);
+        }
+
+        /* BUTONLAR */
+        .btn-dark {
+            background-color: #111;
+            border-color: #111;
+        }
+
+        .btn-dark:hover {
+            background-color: #000;
+            border-color: #000;
+        }
     </style>
 </head>
 <body>
@@ -21,14 +127,21 @@
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('anasayfa') }}">
-                PROMETHEON
+                <!-- LOGO -->
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Prometheon logosu">
+                <span class="site-title">PROMETHEON</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Menüyü Aç">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse justify-content-center" id="navMenu">
                 <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('anasayfa') }}">Anasayfa</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'anasayfa' %}active{% endif %}" href="{{ url_for('anasayfa') }}">Anasayfa</a>
+                    </li>
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Kategoriler</a>
                         <ul class="dropdown-menu">
@@ -39,10 +152,18 @@
                             <li><a class="dropdown-item" href="{{ url_for('kategori_sayfasi', isim='Ekonomi') }}">Ekonomi</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('yazarlar_sayfasi') }}">Yazarlar</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('hakkimizda') }}">Hakkımızda</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('iletisim') }}">İletişim</a></li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'yazarlar_sayfasi' %}active{% endif %}" href="{{ url_for('yazarlar_sayfasi') }}">Yazarlar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'hakkimizda' %}active{% endif %}" href="{{ url_for('hakkimizda') }}">Hakkımızda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'iletisim' %}active{% endif %}" href="{{ url_for('iletisim') }}">İletişim</a>
+                    </li>
                 </ul>
+
                 <ul class="navbar-nav ms-auto">
                     {% if session.get('giris_yapildi') %}
                         <li class="nav-item dropdown">
@@ -62,14 +183,16 @@
                             </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('giris') }}">Giriş Yap</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'giris' %}active{% endif %}" href="{{ url_for('giris') }}">Giriş Yap</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-5" style="min-height: 600px;">
+    <div class="container main-container">
         {% block content %}{% endblock %}
     </div>
 
