@@ -162,6 +162,18 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'iletisim' %}active{% endif %}" href="{{ url_for('iletisim') }}">İletişim</a>
                     </li>
+                        <li class="nav-item d-none d-lg-block">
+        <form action="{{ url_for('arama') }}" method="get" class="d-flex align-items-center ms-2">
+            <input name="q"
+                   class="form-control form-control-sm"
+                   type="search"
+                   placeholder="Ara..."
+                   style="width: 140px;">
+            <button class="btn btn-sm btn-outline-dark ms-1" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </li>
                 </ul>
 
                 <ul class="navbar-nav ms-auto">

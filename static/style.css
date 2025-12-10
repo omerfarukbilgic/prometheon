@@ -204,3 +204,11 @@ a { text-decoration: none; color: inherit; }
     color: #111; /* Üzerine gelince siyah */
     transform: translateY(-3px); /* Hafif yukarı zıplasın */
 }
+.card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
+}
