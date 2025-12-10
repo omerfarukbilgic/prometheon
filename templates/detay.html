@@ -18,6 +18,7 @@
                 <span>
                     <i class="fas fa-user"></i> {{ yazi['ad_soyad'] }} |
                     <i class="fas fa-folder"></i> {{ yazi['kategori'] }}
+                    <span><i class="fas fa-clock"></i> {{ yazi['icerik'] | okuma_suresi }}</span>
                 </span>
                 <span>
                     <i class="fas fa-eye"></i> {{ yazi['goruntulenme'] or 0 }}
