@@ -32,15 +32,34 @@
             <hr class="my-5">
             
             <h4>Yorumlar</h4>
-            {% for yorum in yorumlar %}
-                <div class="card mb-2 bg-light border-0">
-                    <div class="card-body py-2">
-                        <strong>{{ yorum['ad_soyad'] }}</strong>: {{ yorum['yorum'] }}
-                    </div>
-                </div>
-            {% else %}
-                <p class="text-muted">Henüz yorum yok.</p>
-            {% endfor %}
+{% for yorum in yorumlar %}
+    <div class="card mb-2 bg-light border-0">
+        <div class="card-body py-2">
+            <strong>{{ yorum['ad_soyad'] }}</strong>  
+            <span class="text-muted small">{{ yorum['tarih'] }}</span><br>
+            {{ yorum['yorum'] }}
+        </div>
+    </div>
+{% else %}
+    <p class="text-muted">Henüz yorum yok.</p>
+{% endfor %}
+
+<hr class="my-4">
+
+{% if session.get('giris_yapildi') %}
+    <h5>Yorum Yaz</h5>
+    <form method="post" action="{{ url_for('yorum_ekle', id=yazi['id']) }}">
+        <div class="mb-3">
+            <textarea name="yorum" class="form-control" rows="3"
+                      placeholder="Düşüncelerini yaz..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-dark btn-sm">Gönder</button>
+    </form>
+{% else %}
+    <p class="text-muted">
+        Yorum yapabilmek için <a href="{{ url_for('giris') }}">giriş yap</a>.
+    </p>
+{% endif %}
             
             {% if session.get('giris_yapildi') %}
     {% if session.get('rol') == 'admin' or session.get('user_id') == yazi['author_id'] %}
