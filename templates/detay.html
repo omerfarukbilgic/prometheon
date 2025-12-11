@@ -7,71 +7,78 @@
         {% if not yazi %}
             <p class="text-muted">Bu yazı bulunamadı.</p>
         {% else %}
+
+            {# Kapak resmi #}
             {% if yazi['resim'] %}
                 <img src="{{ url_for('static', filename='uploads/' + yazi['resim']) }}"
                      class="w-100 rounded mb-4"
                      style="max-height: 400px; object-fit: cover;">
             {% endif %}
-            
+
+            {# Başlık + meta #}
             <h1 class="fw-bold mb-3">{{ yazi['baslik'] }}</h1>
             <div class="text-muted mb-4 d-flex justify-content-between">
                 <span>
                     <i class="fas fa-user"></i> {{ yazi['ad_soyad'] }} |
-                    <i class="fas fa-folder"></i> {{ yazi['kategori'] }}
-                    <span><i class="fas fa-clock"></i> {{ yazi['icerik'] | okuma_suresi }}</span>
+                    <i class="fas fa-folder"></i> {{ yazi['kategori'] }} |
+                    <i class="fas fa-clock"></i> {{ yazi['icerik'] | okuma_suresi }}
                 </span>
                 <span>
                     <i class="fas fa-eye"></i> {{ yazi['goruntulenme'] or 0 }}
                 </span>
             </div>
-            
+
+            {# İçerik #}
             <div class="article-content" style="font-size: 1.1rem; line-height: 1.8;">
                 {{ yazi['icerik'] | safe }}
             </div>
-            
+
             <hr class="my-5">
-            
+
+            {# Yorumlar listesi #}
             <h4>Yorumlar</h4>
-{% for yorum in yorumlar %}
-    <div class="card mb-2 bg-light border-0">
-        <div class="card-body py-2">
-            <strong>{{ yorum['ad_soyad'] }}</strong>  
-            <span class="text-muted small">{{ yorum['tarih'] }}</span><br>
-            {{ yorum['yorum'] }}
-        </div>
-    </div>
-{% else %}
-    <p class="text-muted">Henüz yorum yok.</p>
-{% endfor %}
+            {% for yorum in yorumlar %}
+                <div class="card mb-2 bg-light border-0">
+                    <div class="card-body py-2">
+                        <strong>{{ yorum['ad_soyad'] }}</strong>
+                        <span class="text-muted small ms-2">{{ yorum['tarih'] }}</span><br>
+                        {{ yorum['yorum'] }}
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-muted">Henüz yorum yok.</p>
+            {% endfor %}
 
-<hr class="my-4">
+            <hr class="my-4">
 
-{% if session.get('giris_yapildi') %}
-    <h5>Yorum Yaz</h5>
-    <form method="post" action="{{ url_for('yorum_ekle', id=yazi['id']) }}">
-        <div class="mb-3">
-            <textarea name="yorum" class="form-control" rows="3"
-                      placeholder="Düşüncelerini yaz..." required></textarea>
-        </div>
-        <button type="submit" class="btn btn-dark btn-sm">Gönder</button>
-    </form>
-{% else %}
-    <p class="text-muted">
-        Yorum yapabilmek için <a href="{{ url_for('giris') }}">giriş yap</a>.
-    </p>
-{% endif %}
-            
+            {# Yorum formu #}
             {% if session.get('giris_yapildi') %}
-    {% if session.get('rol') == 'admin' or session.get('user_id') == yazi['author_id'] %}
-        <div class="mt-4 d-flex gap-2">
-            <a href="{{ url_for('duzenle', id=yazi['id']) }}" class="btn btn-warning">✏️ Düzenle</a>
+                <h5>Yorum Yaz</h5>
+                <form method="post" action="{{ url_for('yorum_ekle', id=yazi['id']) }}">
+                    <div class="mb-3">
+                        <textarea name="yorum" class="form-control" rows="3"
+                                  placeholder="Düşüncelerini yaz..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-dark btn-sm">Gönder</button>
+                </form>
+            {% else %}
+                <p class="text-muted">
+                    Yorum yapabilmek için <a href="{{ url_for('giris') }}">giriş yap</a>.
+                </p>
+            {% endif %}
 
-            <form action="{{ url_for('sil', id=yazi['id']) }}" method="post" onsubmit="return confirm('Silmek istediğine emin misin?');">
-                <button class="btn btn-danger">🗑️ Sil</button>
-            </form>
-        </div>
-    {% endif %}
-{% endif %}
+            {# Düzenle / Sil butonları #}
+            {% if session.get('giris_yapildi') and (session.get('rol') == 'admin' or session.get('user_id') == yazi['author_id']) %}
+                <div class="mt-4 d-flex gap-2">
+                    <a href="{{ url_for('duzenle', id=yazi['id']) }}" class="btn btn-warning">✏️ Düzenle</a>
+                    <form action="{{ url_for('sil', id=yazi['id']) }}"
+                          method="post"
+                          onsubmit="return confirm('Silmek istediğine emin misin?');">
+                        <button class="btn btn-danger">🗑️ Sil</button>
+                    </form>
+                </div>
+            {% endif %}
+
         {% endif %}
     </div>
 </div>
