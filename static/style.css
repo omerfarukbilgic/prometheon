@@ -105,13 +105,18 @@ body {
 .nav-link {
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    color: #4B5320 !important; /* Haki Yeşili */
+    color: #4B5320 !important;
     text-transform: uppercase;
     letter-spacing: 1px;
     font-size: 0.85rem;
     margin: 0 10px;
+    transition: color 0.25s ease, transform 0.25s ease;
 }
-.nav-link:hover { color: #000 !important; }
+
+.nav-link:hover {
+    color: #6B8E23 !important; /* Daha canlı bir haki tonu */
+    transform: translateY(-1px); /* Çok hafif yukarı kalksın */
+}
 
 /* --- MOBİL İÇİN ÖZEL AYARLAR (EKRAN KÜÇÜLÜNCE BURASI ÇALIŞIR) --- */
 @media (max-width: 991px) {
