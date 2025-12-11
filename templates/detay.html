@@ -63,8 +63,12 @@
                 </form>
             {% else %}
                 <p class="text-muted">
-                    Yorum yapabilmek için <a href="{{ url_for('giris') }}">giriş yap</a>.
-                </p>
+    Yorum yapabilmek için
+    <a href="{{ url_for('giris') }}" class="btn btn-outline-success btn-sm ms-1">
+        Giriş yap
+    </a>
+    .
+</p>
             {% endif %}
 
             {# Düzenle / Sil butonları #}
