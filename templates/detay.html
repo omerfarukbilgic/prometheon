@@ -2,88 +2,152 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-9">
+  <div class="col-md-9">
 
-        {% if not yazi %}
-            <p class="text-muted">Bu yazı bulunamadı.</p>
-        {% else %}
+    {% if not yazi %}
+      <p class="text-muted">Bu yazı bulunamadı.</p>
+    {% else %}
 
-            {# Kapak resmi #}
-            {% if yazi['resim'] %}
-                <img src="{{ url_for('static', filename='uploads/' + yazi['resim']) }}"
-                     class="w-100 rounded mb-4"
-                     style="max-height: 400px; object-fit: cover;">
-            {% endif %}
+      {% if yazi['resim'] %}
+        <img src="{{ url_for('static', filename='uploads/' + yazi['resim']) }}"
+             class="w-100 rounded mb-4"
+             style="max-height: 400px; object-fit: cover;">
+      {% endif %}
 
-            {# Başlık + meta #}
-            <h1 class="fw-bold mb-3">{{ yazi['baslik'] }}</h1>
-            <div class="text-muted mb-4 d-flex justify-content-between">
-                <span>
-                    <i class="fas fa-user"></i> {{ yazi['ad_soyad'] }} |
-                    <i class="fas fa-folder"></i> {{ yazi['kategori'] }} |
-                    <i class="fas fa-clock"></i> {{ yazi['icerik'] | okuma_suresi }}
-                </span>
-                <span>
-                    <i class="fas fa-eye"></i> {{ yazi['goruntulenme'] or 0 }}
-                </span>
-            </div>
+      <h1 class="fw-bold mb-3">{{ yazi['baslik'] }}</h1>
 
-            {# İçerik #}
-            <div class="article-content" style="font-size: 1.1rem; line-height: 1.8;">
-                {{ yazi['icerik'] | safe }}
-            </div>
+      <div class="text-muted mb-4 d-flex justify-content-between">
+        <span>
+          <i class="fas fa-user"></i> {{ yazi['ad_soyad'] }} |
+          <i class="fas fa-folder"></i> {{ yazi['kategori'] }} |
+          <i class="fas fa-clock"></i> {{ yazi['icerik'] | okuma_suresi }}
+        </span>
+        <span>
+          <i class="fas fa-eye"></i> {{ yazi['goruntulenme'] or 0 }}
+        </span>
+      </div>
 
-            <hr class="my-5">
+      <div class="article-content" style="font-size: 1.1rem; line-height: 1.8;">
+        {{ yazi['icerik'] | safe }}
+      </div>
 
-            {# Yorumlar listesi #}
-            <h4>Yorumlar</h4>
-            {% for yorum in yorumlar %}
-                <div class="card mb-2 bg-light border-0">
-                    <div class="card-body py-2">
-                        <strong>{{ yorum['ad_soyad'] }}</strong>
-                        <span class="text-muted small ms-2">{{ yorum['tarih'] }}</span><br>
-                        {{ yorum['yorum'] }}
-                    </div>
+      <hr class="my-5">
+
+      <h4>Yorumlar</h4>
+
+      {% for yorum in yorumlar %}
+        <div class="card mb-2 bg-light border-0">
+          <div class="card-body py-2">
+
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <strong>{{ yorum['ad_soyad'] }}</strong>
+                <span class="text-muted small ms-2">{{ yorum['tarih'] }}</span>
+              </div>
+
+              {% if session.get('giris_yapildi') and (session.get('rol') == 'admin' or session.get('user_id') == yorum['user_id']) %}
+                <div class="d-flex gap-2">
+                  <a class="btn btn-outline-secondary btn-sm"
+                     href="{{ url_for('yorum_duzenle', yorum_id=yorum['id']) }}">Düzenle</a>
+
+                  <form method="post" action="{{ url_for('yorum_sil', yorum_id=yorum['id']) }}"
+                        onsubmit="return confirm('Yorumu ve cevaplarını silmek istiyor musun?');">
+                    <button class="btn btn-outline-danger btn-sm">Sil</button>
+                  </form>
                 </div>
-            {% else %}
-                <p class="text-muted">Henüz yorum yok.</p>
-            {% endfor %}
+              {% endif %}
+            </div>
 
-            <hr class="my-4">
+            <div class="mt-2">{{ yorum['yorum'] }}</div>
 
-            {# Yorum formu #}
+            {# cevapla butonu #}
             {% if session.get('giris_yapildi') %}
-                <h5>Yorum Yaz</h5>
-                <form method="post" action="{{ url_for('yorum_ekle', id=yazi['id']) }}">
-                    <div class="mb-3">
-                        <textarea name="yorum" class="form-control" rows="3"
-                                  placeholder="Düşüncelerini yaz..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-dark btn-sm">Gönder</button>
+              <div class="mt-2">
+                <button class="btn btn-sm btn-outline-success"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#reply-{{ yorum['id'] }}">
+                  Cevapla
+                </button>
+              </div>
+
+              <div class="collapse mt-2" id="reply-{{ yorum['id'] }}">
+                <form method="post" action="{{ url_for('yorum_yanitla', post_id=yazi['id'], parent_id=yorum['id']) }}">
+                  <div class="mb-2">
+                    <textarea name="yorum" class="form-control" rows="2" placeholder="Cevabın..." required></textarea>
+                  </div>
+                  <button class="btn btn-dark btn-sm">Gönder</button>
                 </form>
-            {% else %}
-                <p class="text-muted">
-    Yorum yapabilmek için
-    <a href="{{ url_for('giris') }}" class="btn btn-outline-success btn-sm ms-1">
-        Giriş yap
-    </a>
-    .
-</p>
+              </div>
             {% endif %}
 
-            {# Düzenle / Sil butonları #}
-            {% if session.get('giris_yapildi') and (session.get('rol') == 'admin' or session.get('user_id') == yazi['author_id']) %}
-                <div class="mt-4 d-flex gap-2">
-                    <a href="{{ url_for('duzenle', id=yazi['id']) }}" class="btn btn-warning">✏️ Düzenle</a>
-                    <form action="{{ url_for('sil', id=yazi['id']) }}"
-                          method="post"
-                          onsubmit="return confirm('Silmek istediğine emin misin?');">
-                        <button class="btn btn-danger">🗑️ Sil</button>
-                    </form>
-                </div>
+            {# cevaplar #}
+            {% set cevaplar = cevap_map.get(yorum['id'], []) %}
+            {% if cevaplar %}
+              <div class="mt-3 ms-4">
+                {% for c in cevaplar %}
+                  <div class="card mb-2 border-0" style="background: #ffffff;">
+                    <div class="card-body py-2">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <strong>{{ c['ad_soyad'] }}</strong>
+                          <span class="text-muted small ms-2">{{ c['tarih'] }}</span>
+                        </div>
+
+                        {% if session.get('giris_yapildi') and (session.get('rol') == 'admin' or session.get('user_id') == c['user_id']) %}
+                          <div class="d-flex gap-2">
+                            <a class="btn btn-outline-secondary btn-sm"
+                               href="{{ url_for('yorum_duzenle', yorum_id=c['id']) }}">Düzenle</a>
+
+                            <form method="post" action="{{ url_for('yorum_sil', yorum_id=c['id']) }}"
+                                  onsubmit="return confirm('Bu cevabı silmek istiyor musun?');">
+                              <button class="btn btn-outline-danger btn-sm">Sil</button>
+                            </form>
+                          </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="mt-2">{{ c['yorum'] }}</div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
             {% endif %}
 
-        {% endif %}
-    </div>
+          </div>
+        </div>
+      {% else %}
+        <p class="text-muted">Henüz yorum yok.</p>
+      {% endfor %}
+
+      <hr class="my-4">
+
+      {% if session.get('giris_yapildi') %}
+        <h5>Yorum Yaz</h5>
+        <form method="post" action="{{ url_for('yorum_ekle', post_id=yazi['id']) }}">
+          <div class="mb-3">
+            <textarea name="yorum" class="form-control" rows="3" placeholder="Düşüncelerini yaz..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-dark btn-sm">Gönder</button>
+        </form>
+      {% else %}
+        <p class="text-muted">
+          Yorum yapabilmek için
+          <a href="{{ url_for('giris') }}" class="btn btn-outline-success btn-sm ms-1">Giriş yap</a>.
+        </p>
+      {% endif %}
+
+      {% if session.get('giris_yapildi') and (session.get('rol') == 'admin' or session.get('user_id') == yazi['author_id']) %}
+        <div class="mt-4 d-flex gap-2">
+          <a href="{{ url_for('duzenle', id=yazi['id']) }}" class="btn btn-warning">✏️ Düzenle</a>
+          <form action="{{ url_for('sil', id=yazi['id']) }}" method="post"
+                onsubmit="return confirm('Silmek istediğine emin misin?');">
+            <button class="btn btn-danger">🗑️ Sil</button>
+          </form>
+        </div>
+      {% endif %}
+
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
