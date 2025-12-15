@@ -7,12 +7,11 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = "cok_gizli_anahtar"
 
-# --- AYARLAR ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database.db")
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 def db_baglantisi_kur():
@@ -21,7 +20,6 @@ def db_baglantisi_kur():
     return conn
 
 
-# --- FİLTRELER ---
 @app.template_filter("okuma_suresi")
 def okuma_suresi(metin):
     if not metin:
@@ -29,31 +27,40 @@ def okuma_suresi(metin):
     return f"{max(1, int(len(metin.split()) / 200))} dk"
 
 
-# --- ANASAYFA ---
+# -------------------------
+# ANASAYFA
+# -------------------------
 @app.route("/")
 def anasayfa():
     conn = db_baglantisi_kur()
-    yazilar = conn.execute("SELECT * FROM yazilar WHERE durum = 1 ORDER BY id DESC").fetchall()
+    yazilar = conn.execute(
+        "SELECT * FROM yazilar WHERE durum = 1 ORDER BY id DESC"
+    ).fetchall()
     conn.close()
     return render_template("index.html", posts=yazilar)
 
 
-# --- DETAY + YORUMLAR (ANA + CEVAP) ---
+# -------------------------
+# YAZI DETAY + YORUMLAR (GET)
+# -------------------------
 @app.route("/<int:id>")
 def detay(id):
     conn = db_baglantisi_kur()
 
-    # Görüntülenme sayacı
+    # görüntülenme
     try:
-        conn.execute("UPDATE yazilar SET goruntulenme = goruntulenme + 1 WHERE id = ?", (id,))
+        conn.execute(
+            "UPDATE yazilar SET goruntulenme = COALESCE(goruntulenme,0) + 1 WHERE id = ?",
+            (id,),
+        )
         conn.commit()
     except Exception as e:
         print("goruntulenme:", e)
 
-    # Yazı + yazar
+    # yazı + yazar
     yazi = conn.execute(
         """
-        SELECT yazilar.*, users.ad_soyad, users.profil_resmi, users.biyografi
+        SELECT yazilar.*, users.ad_soyad
         FROM yazilar
         JOIN users ON yazilar.author_id = users.id
         WHERE yazilar.id = ?
@@ -65,31 +72,33 @@ def detay(id):
         conn.close()
         abort(404)
 
-    # Ana yorumlar (parent yok)
+    # ana yorumlar
     yorumlar = conn.execute(
         """
         SELECT yorumlar.*, users.ad_soyad
         FROM yorumlar
         JOIN users ON yorumlar.user_id = users.id
-        WHERE post_id = ? AND (parent_id IS NULL OR parent_id = 0)
+        WHERE post_id = ?
+          AND (parent_id IS NULL OR parent_id = 0)
         ORDER BY id DESC
         """,
         (id,),
     ).fetchall()
 
-    # Cevaplar (parent var)
+    # cevaplar
     cevaplar = conn.execute(
         """
         SELECT yorumlar.*, users.ad_soyad
         FROM yorumlar
         JOIN users ON yorumlar.user_id = users.id
-        WHERE post_id = ? AND parent_id IS NOT NULL AND parent_id != 0
+        WHERE post_id = ?
+          AND parent_id IS NOT NULL
+          AND parent_id != 0
         ORDER BY id ASC
         """,
         (id,),
     ).fetchall()
 
-    # parent_id -> [cevaplar]
     cevap_map = {}
     for c in cevaplar:
         cevap_map.setdefault(c["parent_id"], []).append(c)
@@ -98,6 +107,9 @@ def detay(id):
     return render_template("detay.html", yazi=yazi, yorumlar=yorumlar, cevap_map=cevap_map)
 
 
+# -------------------------
+# YORUM EKLE (ANA YORUM)
+# -------------------------
 @app.route("/yorum-ekle/<int:post_id>", methods=["POST"])
 def yorum_ekle(post_id):
     if not session.get("giris_yapildi"):
@@ -117,6 +129,9 @@ def yorum_ekle(post_id):
     return redirect(url_for("detay", id=post_id))
 
 
+# -------------------------
+# YORUMA CEVAP
+# -------------------------
 @app.route("/yorum-yanitla/<int:post_id>/<int:parent_id>", methods=["POST"])
 def yorum_yanitla(post_id, parent_id):
     if not session.get("giris_yapildi"):
@@ -136,6 +151,10 @@ def yorum_yanitla(post_id, parent_id):
     return redirect(url_for("detay", id=post_id))
 
 
+# -------------------------
+# YORUM SİL (admin her şeyi; user kendi yorumunu)
+# Not: Bir ana yorumu silince cevapları da siler.
+# -------------------------
 @app.route("/yorum-sil/<int:yorum_id>", methods=["POST"])
 def yorum_sil(yorum_id):
     if not session.get("giris_yapildi"):
@@ -151,14 +170,17 @@ def yorum_sil(yorum_id):
         conn.close()
         return "Yetkisiz", 403
 
-    post_id = yorum["post_id"]
-    # yorumu + cevaplarını sil
+    # ana yorumsa cevaplarıyla birlikte sil, cevapsa sadece kendini sil
     conn.execute("DELETE FROM yorumlar WHERE id=? OR parent_id=?", (yorum_id, yorum_id))
     conn.commit()
+    post_id = yorum["post_id"]
     conn.close()
     return redirect(url_for("detay", id=post_id))
 
 
+# -------------------------
+# YORUM DÜZENLE
+# -------------------------
 @app.route("/yorum-duzenle/<int:yorum_id>", methods=["GET", "POST"])
 def yorum_duzenle(yorum_id):
     if not session.get("giris_yapildi"):
@@ -187,7 +209,9 @@ def yorum_duzenle(yorum_id):
     return render_template("yorum_duzenle.html", yorum=yorum)
 
 
-# --- YENİ YAZI / DÜZENLE / SİL ---
+# -------------------------
+# YENİ YAZI
+# -------------------------
 @app.route("/yeni", methods=("GET", "POST"))
 def yeni_yazi():
     if session.get("rol") not in ["admin", "yazar"]:
@@ -221,13 +245,16 @@ def yeni_yazi():
     return render_template("yeni.html")
 
 
+# -------------------------
+# YAZI DÜZENLE
+# -------------------------
 @app.route("/<int:id>/duzenle", methods=("GET", "POST"))
 def duzenle(id):
     if not session.get("giris_yapildi"):
         return redirect(url_for("giris"))
 
     conn = db_baglantisi_kur()
-    yazi = conn.execute("SELECT * FROM yazilar WHERE id = ?", (id,)).fetchone()
+    yazi = conn.execute("SELECT * FROM yazilar WHERE id=?", (id,)).fetchone()
     if yazi is None:
         conn.close()
         abort(404)
@@ -263,6 +290,9 @@ def duzenle(id):
     return render_template("duzenle.html", yazi=yazi)
 
 
+# -------------------------
+# YAZI SİL
+# -------------------------
 @app.route("/<int:id>/sil", methods=("POST",))
 def sil(id):
     if not session.get("giris_yapildi"):
@@ -284,7 +314,9 @@ def sil(id):
     return redirect(url_for("anasayfa"))
 
 
-# --- GİRİŞ / KAYIT / ÇIKIŞ ---
+# -------------------------
+# GİRİŞ / KAYIT / ÇIKIŞ
+# -------------------------
 @app.route("/giris", methods=("GET", "POST"))
 def giris():
     if request.method == "POST":
@@ -298,7 +330,7 @@ def giris():
         if user and check_password_hash(user["sifre"], sifre):
             session["user_id"] = user["id"]
             session["ad_soyad"] = user["ad_soyad"]
-            session["rol"] = user["rol"]
+            session["rol"] = user.get("rol", "okur")
             session["giris_yapildi"] = True
             return redirect(url_for("anasayfa"))
 
@@ -314,13 +346,18 @@ def kayit():
             conn = db_baglantisi_kur()
             conn.execute(
                 "INSERT INTO users (ad_soyad, email, sifre) VALUES (?,?,?)",
-                (request.form["ad_soyad"], request.form["email"], generate_password_hash(request.form["sifre"])),
+                (
+                    request.form["ad_soyad"],
+                    request.form["email"],
+                    generate_password_hash(request.form["sifre"]),
+                ),
             )
             conn.commit()
             conn.close()
             return redirect(url_for("giris"))
         except:
             return render_template("kayit.html", hata="Bu e-posta zaten kayıtlı!")
+
     return render_template("kayit.html")
 
 
@@ -330,47 +367,13 @@ def cikis():
     return redirect(url_for("anasayfa"))
 
 
-# --- PROFİL DÜZENLE (FOTO + BİYO) ---
-@app.route("/profil-duzenle", methods=("GET", "POST"))
-def profil_duzenle():
-    if not session.get("giris_yapildi"):
-        return redirect(url_for("giris"))
-
-    conn = db_baglantisi_kur()
-
-    if request.method == "POST":
-        ad_soyad = request.form["ad_soyad"]
-        biyografi = request.form["biyografi"]
-        profil_resmi = request.files.get("profil_resmi")
-
-        if profil_resmi and profil_resmi.filename:
-            dosya_adi = secure_filename(profil_resmi.filename)
-            profil_resmi.save(os.path.join(app.config["UPLOAD_FOLDER"], dosya_adi))
-            conn.execute(
-                "UPDATE users SET ad_soyad=?, biyografi=?, profil_resmi=? WHERE id=?",
-                (ad_soyad, biyografi, dosya_adi, session["user_id"]),
-            )
-        else:
-            conn.execute(
-                "UPDATE users SET ad_soyad=?, biyografi=? WHERE id=?",
-                (ad_soyad, biyografi, session["user_id"]),
-            )
-
-        conn.commit()
-        session["ad_soyad"] = ad_soyad
-        conn.close()
-        return redirect(url_for("anasayfa"))
-
-    user = conn.execute("SELECT * FROM users WHERE id=?", (session["user_id"],)).fetchone()
-    conn.close()
-    return render_template("profil_duzenle.html", user=user)
-
-
-# --- YAZARLAR / YAZAR DETAY ---
+# -------------------------
+# YAZARLAR
+# -------------------------
 @app.route("/yazarlar")
 def yazarlar_sayfasi():
     conn = db_baglantisi_kur()
-    yazarlar = conn.execute("SELECT * FROM users WHERE rol IN ('admin', 'yazar')").fetchall()
+    yazarlar = conn.execute("SELECT * FROM users WHERE rol IN ('admin','yazar')").fetchall()
     conn.close()
     return render_template("yazarlar.html", yazarlar=yazarlar)
 
@@ -390,7 +393,9 @@ def yazar_profili(id):
     return render_template("yazar_detay.html", yazar=yazar, yazilar=yazilar)
 
 
-# --- ARAMA ---
+# -------------------------
+# ARAMA
+# -------------------------
 @app.route("/arama")
 def arama():
     kelime = request.args.get("q", "").strip()
@@ -400,7 +405,8 @@ def arama():
         posts = conn.execute(
             """
             SELECT * FROM yazilar
-            WHERE durum = 1 AND (baslik LIKE ? OR icerik LIKE ?)
+            WHERE durum = 1
+              AND (baslik LIKE ? OR icerik LIKE ?)
             ORDER BY id DESC
             """,
             (f"%{kelime}%", f"%{kelime}%"),
@@ -412,18 +418,9 @@ def arama():
     return render_template("arama.html", kelime=kelime, posts=posts)
 
 
-# --- KATEGORİ ---
-@app.route("/kategori/<isim>")
-def kategori_sayfasi(isim):
-    conn = db_baglantisi_kur()
-    yazilar = conn.execute(
-        "SELECT * FROM yazilar WHERE kategori=? AND durum=1 ORDER BY id DESC", (isim,)
-    ).fetchall()
-    conn.close()
-    return render_template("index.html", posts=yazilar)
-
-
-# --- CKEDITOR UPLOAD ---
+# -------------------------
+# CKEDITOR UPLOAD
+# -------------------------
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if "upload" not in request.files:
@@ -441,7 +438,9 @@ def upload_file():
     return f"<script>window.parent.CKEDITOR.tools.callFunction({callback}, '{file_url}', '');</script>"
 
 
-# --- SABİT SAYFALAR ---
+# -------------------------
+# SABİT SAYFALAR
+# -------------------------
 @app.route("/hakkimizda")
 def hakkimizda():
     return render_template("hakkimizda.html")
@@ -450,41 +449,46 @@ def hakkimizda():
 @app.route("/iletisim", methods=("GET", "POST"))
 def iletisim():
     if request.method == "POST":
-        # şimdilik sadece success
+        # burada db kaydı yapmıyoruz, sadece başarı gösteriyoruz
         return render_template("iletisim.html", basarili=True)
     return render_template("iletisim.html", basarili=False)
 
 
-# --- TAMİR (opsiyonel) ---
+# -------------------------
+# TAMİR: DB şeması
+# -------------------------
 @app.route("/tamir")
 def tamir_et():
     conn = db_baglantisi_kur()
     mesaj = []
 
-    try:
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS yorumlar (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                post_id INTEGER,
-                user_id INTEGER,
-                yorum TEXT,
-                tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            """
+    # yorumlar tablosu + parent_id
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS yorumlar (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER,
+            user_id INTEGER,
+            yorum TEXT,
+            tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-        conn.commit()
-        mesaj.append("✅ yorumlar tablo OK")
-    except Exception as e:
-        mesaj.append(f"❌ yorumlar tablo: {e}")
-
-    # parent_id sütunu yoksa ekle
+        """
+    )
+    conn.commit()
     try:
         conn.execute("ALTER TABLE yorumlar ADD COLUMN parent_id INTEGER")
         conn.commit()
         mesaj.append("✅ parent_id eklendi")
     except:
-        mesaj.append("ℹ️ parent_id zaten var")
+        mesaj.append("✅ parent_id zaten var")
+
+    # goruntulenme
+    try:
+        conn.execute("ALTER TABLE yazilar ADD COLUMN goruntulenme INTEGER DEFAULT 0")
+        conn.commit()
+        mesaj.append("✅ goruntulenme eklendi")
+    except:
+        mesaj.append("✅ goruntulenme zaten var")
 
     conn.close()
     return "<br>".join(mesaj)
