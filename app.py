@@ -269,19 +269,31 @@ def sil(id):
 @app.route("/giris", methods=("GET", "POST"))
 def giris():
     if request.method == "POST":
-        email = request.form["email"]
-        sifre = request.form["sifre"]
+        email = request.form.get("email", "").strip().lower()
+        sifre = request.form.get("sifre", "")
 
         conn = db_baglantisi_kur()
-        user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        user = conn.execute(
+            """
+            SELECT
+                id,
+                ad_soyad,
+                email,
+                sifre,
+                COALESCE(rol, 'okur') AS rol
+            FROM users
+            WHERE lower(email) = ?
+            """,
+            (email,)
+        ).fetchone()
         conn.close()
 
-        if user and check_password_hash(user["sifre"], sifre):
+        if user and user["sifre"] and check_password_hash(user["sifre"], sifre):
             session["user_id"] = user["id"]
             session["ad_soyad"] = user["ad_soyad"]
             session["rol"] = user["rol"]
             session["giris_yapildi"] = True
-            return redirect(url_for("admin_panel") if user["rol"] == "admin" else url_for("anasayfa"))
+            return redirect(url_for("anasayfa"))
 
         return render_template("giris.html", hata="E-posta veya şifre hatalı!")
 
