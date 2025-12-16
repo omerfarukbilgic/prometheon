@@ -42,12 +42,8 @@ def anasayfa():
 def detay(id):
     conn = db_baglantisi_kur()
 
-    # görüntülenme
-    try:
-        conn.execute("UPDATE yazilar SET goruntulenme = goruntulenme + 1 WHERE id = ?", (id,))
-        conn.commit()
-    except Exception as e:
-        print("goruntulenme:", e)
+    conn.execute("UPDATE yazilar SET goruntulenme = goruntulenme + 1 WHERE id = ?", (id,))
+    conn.commit()
 
     yazi = conn.execute("""
         SELECT yazilar.*, users.ad_soyad
@@ -59,8 +55,7 @@ def detay(id):
     if yazi is None:
         conn.close()
         abort(404)
-
-    # ana yorumlar
+ 
     yorumlar = conn.execute("""
         SELECT yorumlar.*, users.ad_soyad
         FROM yorumlar
@@ -68,8 +63,7 @@ def detay(id):
         WHERE post_id = ? AND (parent_id IS NULL OR parent_id = 0)
         ORDER BY id DESC
     """, (id,)).fetchall()
-
-    # cevaplar
+ 
     cevaplar = conn.execute("""
         SELECT yorumlar.*, users.ad_soyad
         FROM yorumlar
@@ -83,9 +77,8 @@ def detay(id):
         cevap_map.setdefault(c["parent_id"], []).append(c)
 
     conn.close()
-    return render_template("detay.html", yazi=yazi, yorumlar=yorumlar, cevap_map=cevap_map)
-
-
+    return render_template("detay.html", yazi=yazi, yorumlar=yorumlar, cevap_map=cevap_map) 
+ 
 @app.route("/yorum-ekle/<int:post_id>", methods=["POST"])
 def yorum_ekle(post_id):
     if not session.get("giris_yapildi"):
