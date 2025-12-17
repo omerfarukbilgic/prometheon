@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = "cok_gizli_anahtar"
 
+# --- AYARLAR ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database.db")
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
@@ -19,15 +20,7 @@ def db_baglantisi_kur():
     conn.row_factory = sqlite3.Row
     return conn
 
-
-def tablo_sutun_var_mi(conn, tablo_adi, sutun_adi) -> bool:
-    try:
-        cols = conn.execute(f"PRAGMA table_info({tablo_adi})").fetchall()
-        return any(c["name"] == sutun_adi for c in cols)
-    except Exception:
-        return False
-
-
+ 
 # --- FİLTRE ---
 @app.template_filter("okuma_suresi")
 def okuma_suresi(metin):
@@ -40,23 +33,27 @@ def okuma_suresi(metin):
 @app.route("/")
 def anasayfa():
     conn = db_baglantisi_kur()
-    yazilar = conn.execute("SELECT * FROM yazilar WHERE durum = 1 ORDER BY id DESC").fetchall()
+    yazilar = conn.execute(
+        "SELECT * FROM yazilar WHERE durum = 1 ORDER BY id DESC"
+    ).fetchall()
     conn.close()
     return render_template("index.html", posts=yazilar)
 
 
-# --- DETAY + YORUMLAR ---
+# --- DETAY + YORUM LİSTELEME (cevap_map ile) ---
 @app.route("/<int:id>")
 def detay(id):
     conn = db_baglantisi_kur()
 
     # görüntülenme
     try:
-        if tablo_sutun_var_mi(conn, "yazilar", "goruntulenme"):
-            conn.execute("UPDATE yazilar SET goruntulenme = goruntulenme + 1 WHERE id = ?", (id,))
-            conn.commit()
+        conn.execute(
+            "UPDATE yazilar SET goruntulenme = COALESCE(goruntulenme,0) + 1 WHERE id = ?",
+            (id,),
+        )
+        conn.commit()
     except Exception as e:
-        print("goruntulenme hata:", e)
+        print("goruntulenme:", e)
 
     yazi = conn.execute(
         """
@@ -72,55 +69,39 @@ def detay(id):
         conn.close()
         abort(404)
 
-    # parent_id var mı?
-    parent_ok = tablo_sutun_var_mi(conn, "yorumlar", "parent_id")
+    # ana yorumlar
+    yorumlar = conn.execute(
+        """
+        SELECT yorumlar.*, users.ad_soyad
+        FROM yorumlar
+        JOIN users ON yorumlar.user_id = users.id
+        WHERE post_id = ? AND (parent_id IS NULL OR parent_id = 0)
+        ORDER BY id DESC
+        """,
+        (id,),
+    ).fetchall()
 
-    if parent_ok:
-        # ana yorumlar
-        yorumlar = conn.execute(
-            """
-            SELECT yorumlar.*, users.ad_soyad
-            FROM yorumlar
-            JOIN users ON yorumlar.user_id = users.id
-            WHERE post_id = ? AND (parent_id IS NULL OR parent_id = 0)
-            ORDER BY id DESC
-            """,
-            (id,),
-        ).fetchall()
+    # cevaplar
+    cevaplar = conn.execute(
+        """
+        SELECT yorumlar.*, users.ad_soyad
+        FROM yorumlar
+        JOIN users ON yorumlar.user_id = users.id
+        WHERE post_id = ? AND parent_id IS NOT NULL AND parent_id != 0
+        ORDER BY id ASC
+        """,
+        (id,),
+    ).fetchall()
 
-        # cevaplar
-        cevaplar = conn.execute(
-            """
-            SELECT yorumlar.*, users.ad_soyad
-            FROM yorumlar
-            JOIN users ON yorumlar.user_id = users.id
-            WHERE post_id = ? AND parent_id IS NOT NULL AND parent_id != 0
-            ORDER BY id ASC
-            """,
-            (id,),
-        ).fetchall()
-
-        cevap_map = {}
-        for c in cevaplar:
-            cevap_map.setdefault(c["parent_id"], []).append(c)
-    else:
-        # eski sistem (parent yok)
-        yorumlar = conn.execute(
-            """
-            SELECT yorumlar.*, users.ad_soyad
-            FROM yorumlar
-            JOIN users ON yorumlar.user_id = users.id
-            WHERE post_id = ?
-            ORDER BY id DESC
-            """,
-            (id,),
-        ).fetchall()
-        cevap_map = {}
+    cevap_map = {}
+    for c in cevaplar:
+        cevap_map.setdefault(c["parent_id"], []).append(c)
 
     conn.close()
     return render_template("detay.html", yazi=yazi, yorumlar=yorumlar, cevap_map=cevap_map)
 
 
+# --- YORUM EKLE (ana yorum) ---
 @app.route("/yorum-ekle/<int:post_id>", methods=["POST"])
 def yorum_ekle(post_id):
     if not session.get("giris_yapildi"):
@@ -131,24 +112,16 @@ def yorum_ekle(post_id):
         return redirect(url_for("detay", id=post_id))
 
     conn = db_baglantisi_kur()
-    parent_ok = tablo_sutun_var_mi(conn, "yorumlar", "parent_id")
-
-    if parent_ok:
-        conn.execute(
-            "INSERT INTO yorumlar (post_id, user_id, yorum, parent_id) VALUES (?, ?, ?, NULL)",
-            (post_id, session["user_id"], yorum_metin),
-        )
-    else:
-        conn.execute(
-            "INSERT INTO yorumlar (post_id, user_id, yorum) VALUES (?, ?, ?)",
-            (post_id, session["user_id"], yorum_metin),
-        )
-
+    conn.execute(
+        "INSERT INTO yorumlar (post_id, user_id, yorum, parent_id) VALUES (?, ?, ?, NULL)",
+        (post_id, session["user_id"], yorum_metin),
+    )
     conn.commit()
     conn.close()
     return redirect(url_for("detay", id=post_id))
 
 
+# --- YORUM CEVAPLA ---
 @app.route("/yorum-yanitla/<int:post_id>/<int:parent_id>", methods=["POST"])
 def yorum_yanitla(post_id, parent_id):
     if not session.get("giris_yapildi"):
@@ -159,12 +132,7 @@ def yorum_yanitla(post_id, parent_id):
         return redirect(url_for("detay", id=post_id))
 
     conn = db_baglantisi_kur()
-    parent_ok = tablo_sutun_var_mi(conn, "yorumlar", "parent_id")
-    if not parent_ok:
-        conn.close()
-        return redirect(url_for("detay", id=post_id))
-
-    conn.execute(
+    conn.execute( 
         "INSERT INTO yorumlar (post_id, user_id, yorum, parent_id) VALUES (?, ?, ?, ?)",
         (post_id, session["user_id"], metin, parent_id),
     )
@@ -173,6 +141,7 @@ def yorum_yanitla(post_id, parent_id):
     return redirect(url_for("detay", id=post_id))
 
 
+# --- YORUM SİL (ve alt cevaplarını da sil) ---
 @app.route("/yorum-sil/<int:yorum_id>", methods=["POST"])
 def yorum_sil(yorum_id):
     if not session.get("giris_yapildi"):
@@ -188,20 +157,16 @@ def yorum_sil(yorum_id):
         conn.close()
         return "Yetkisiz", 403
 
-    parent_ok = tablo_sutun_var_mi(conn, "yorumlar", "parent_id")
-
-    if parent_ok:
-        # yorumu + cevaplarını sil
-        conn.execute("DELETE FROM yorumlar WHERE id=? OR parent_id=?", (yorum_id, yorum_id))
-    else:
-        conn.execute("DELETE FROM yorumlar WHERE id=?", (yorum_id,))
-
-    conn.commit()
     post_id = yorum["post_id"]
-    conn.close()
+
+    # yorumu + cevaplarını sil
+    conn.execute("DELETE FROM yorumlar WHERE id=? OR parent_id=?", (yorum_id, yorum_id))
+    conn.commit()
+    conn.close() 
     return redirect(url_for("detay", id=post_id))
 
 
+# --- YORUM DÜZENLE ---
 @app.route("/yorum-duzenle/<int:yorum_id>", methods=["GET", "POST"])
 def yorum_duzenle(yorum_id):
     if not session.get("giris_yapildi"):
@@ -230,7 +195,7 @@ def yorum_duzenle(yorum_id):
     return render_template("yorum_duzenle.html", yorum=yorum)
 
 
-# --- YENİ YAZI / DÜZENLE / SİL ---
+# --- YENİ YAZI ---
 @app.route("/yeni", methods=("GET", "POST"))
 def yeni_yazi():
     if session.get("rol") not in ["admin", "yazar"]:
@@ -264,6 +229,7 @@ def yeni_yazi():
     return render_template("yeni.html")
 
 
+# --- YAZI DÜZENLE ---
 @app.route("/<int:id>/duzenle", methods=("GET", "POST"))
 def duzenle(id):
     if not session.get("giris_yapildi"):
@@ -271,6 +237,7 @@ def duzenle(id):
 
     conn = db_baglantisi_kur()
     yazi = conn.execute("SELECT * FROM yazilar WHERE id = ?", (id,)).fetchone()
+
     if yazi is None:
         conn.close()
         abort(404)
@@ -306,12 +273,22 @@ def duzenle(id):
     return render_template("duzenle.html", yazi=yazi)
 
 
+# --- YAZI SİL ---
 @app.route("/<int:id>/sil", methods=("POST",))
 def sil(id):
     if not session.get("giris_yapildi"):
         return redirect(url_for("giris"))
 
     conn = db_baglantisi_kur()
+    yazi = conn.execute("SELECT * FROM yazilar WHERE id=?", (id,)).fetchone()
+    if yazi is None:
+        conn.close()
+        abort(404)
+
+    if session.get("rol") != "admin" and session.get("user_id") != yazi["author_id"]:
+        conn.close()
+        return "Yetkisiz", 403
+
     conn.execute("DELETE FROM yazilar WHERE id=?", (id,))
     conn.commit()
     conn.close()
@@ -334,10 +311,7 @@ def giris():
             session["ad_soyad"] = user["ad_soyad"]
             session["rol"] = user["rol"]
             session["giris_yapildi"] = True
-
-            if user["rol"] == "admin":
-                return redirect(url_for("admin_panel"))
-            return redirect(url_for("anasayfa"))
+            return redirect(url_for("admin_panel") if user["rol"] == "admin" else url_for("anasayfa"))
 
         return render_template("giris.html", hata="E-posta veya şifre hatalı!")
 
@@ -360,7 +334,7 @@ def kayit():
             conn.commit()
             conn.close()
             return redirect(url_for("giris"))
-        except Exception:
+        except:
             return render_template("kayit.html", hata="Bu e-posta zaten kayıtlı!")
 
     return render_template("kayit.html")
@@ -372,7 +346,7 @@ def cikis():
     return redirect(url_for("anasayfa"))
 
 
-# --- PROFİL / YAZARLAR ---
+# --- PROFİL DÜZENLE ---
 @app.route("/profil-duzenle", methods=("GET", "POST"))
 def profil_duzenle():
     if not session.get("giris_yapildi"):
@@ -383,14 +357,14 @@ def profil_duzenle():
     if request.method == "POST":
         ad_soyad = request.form["ad_soyad"]
         biyografi = request.form.get("biyografi", "")
-        profil_resmi = request.files.get("profil_resmi")
+        profil_resmi_dosya = request.files.get("profil_resmi")
 
-        if profil_resmi and profil_resmi.filename:
-            fname = secure_filename(profil_resmi.filename)
-            profil_resmi.save(os.path.join(app.config["UPLOAD_FOLDER"], fname))
+        if profil_resmi_dosya and profil_resmi_dosya.filename:
+            dosya_adi = secure_filename(profil_resmi_dosya.filename)
+            profil_resmi_dosya.save(os.path.join(app.config["UPLOAD_FOLDER"], dosya_adi))
             conn.execute(
                 "UPDATE users SET ad_soyad=?, biyografi=?, profil_resmi=? WHERE id=?",
-                (ad_soyad, biyografi, fname, session["user_id"]),
+                (ad_soyad, biyografi, dosya_adi, session["user_id"]),
             )
         else:
             conn.execute(
@@ -408,6 +382,7 @@ def profil_duzenle():
     return render_template("profil_duzenle.html", user=user)
 
 
+# --- YAZARLAR ---
 @app.route("/yazarlar")
 def yazarlar_sayfasi():
     conn = db_baglantisi_kur()
@@ -427,8 +402,7 @@ def yazar_profili(id):
     yazilar = conn.execute(
         "SELECT * FROM yazilar WHERE author_id=? AND durum=1 ORDER BY id DESC",
         (id,),
-    ).fetchall()
-
+    ).fetchall() 
     conn.close()
     return render_template("yazar_detay.html", yazar=yazar, yazilar=yazilar)
 
@@ -438,7 +412,7 @@ def yazar_profili(id):
 def kategori_sayfasi(isim):
     conn = db_baglantisi_kur()
     yazilar = conn.execute(
-        "SELECT * FROM yazilar WHERE kategori=? AND durum=1 ORDER BY id DESC",
+        "SELECT * FROM yazilar WHERE kategori = ? AND durum = 1 ORDER BY id DESC",
         (isim,),
     ).fetchall()
     conn.close()
@@ -467,13 +441,37 @@ def arama():
     return render_template("arama.html", kelime=kelime, posts=posts)
 
 
+# --- GALERİ ---
+@app.route("/galeri", methods=("GET", "POST"))
+def galeri():
+    mesaj = None
+
+    if request.method == "POST":
+        dosyalar = request.files.getlist("dosyalar")
+        kaydedilenler = []
+
+        for f in dosyalar:
+            if f and f.filename:
+                fname = secure_filename(f.filename)
+                f.save(os.path.join(app.config["UPLOAD_FOLDER"], fname))
+                kaydedilenler.append(fname)
+
+        mesaj = f"{len(kaydedilenler)} adet resim yüklendi." if kaydedilenler else "Hiç dosya seçilmedi."
+
+    try:
+        resimler = sorted(os.listdir(app.config["UPLOAD_FOLDER"]))
+    except FileNotFoundError:
+        resimler = []
+
+    return render_template("galeri.html", resimler=resimler, mesaj=mesaj)
+
+
 # --- CKEDITOR UPLOAD ---
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if "upload" not in request.files:
         return "No file part", 400
-
-    f = request.files["upload"]
+    f = request.files["upload"] 
     if f.filename == "":
         return "No selected file", 400
 
@@ -492,8 +490,7 @@ def admin_panel():
         return "Yetkisiz", 403
 
     conn = db_baglantisi_kur()
-
-    bekleyenler = conn.execute(
+    bekleyenler = conn.execute( 
         """
         SELECT yazilar.*, users.ad_soyad AS yazar_adi
         FROM yazilar
@@ -508,7 +505,7 @@ def admin_panel():
     # iletişim tablon yoksa patlamasın
     try:
         mesajlar = conn.execute("SELECT * FROM iletisim_mesajlari ORDER BY tarih DESC").fetchall()
-    except Exception:
+    except:
         mesajlar = []
 
     conn.close()
@@ -519,8 +516,7 @@ def admin_panel():
 def onayla(id):
     if session.get("rol") != "admin":
         return "Yetkisiz", 403
-
-    conn = db_baglantisi_kur()
+    conn = db_baglantisi_kur() 
     conn.execute("UPDATE yazilar SET durum=1 WHERE id=?", (id,))
     conn.commit()
     conn.close()
@@ -530,8 +526,7 @@ def onayla(id):
 @app.route("/admin/rutbe/<int:user_id>/<rol>", methods=("POST",))
 def admin_rutbe(user_id, rol):
     if session.get("rol") != "admin":
-        return "Yetkisiz", 403
-
+        return "Yetkisiz", 403 
     if rol not in ["okur", "yazar"]:
         return "Geçersiz rol", 400
 
@@ -551,18 +546,18 @@ def hakkimizda():
 @app.route("/iletisim", methods=("GET", "POST"))
 def iletisim():
     if request.method == "POST":
-        # şu an sadece mesaj gösteriyorsun
+        # şimdilik sadece success
         return render_template("iletisim.html", basarili=True)
     return render_template("iletisim.html", basarili=False)
 
 
-# --- TAMİR ---
+# --- TAMİR (DB migrate) ---
 @app.route("/tamir")
 def tamir_et():
     conn = db_baglantisi_kur()
     mesaj = []
 
-    # yorumlar tablosu
+    # yorumlar tablosu (parent_id dahil)
     try:
         conn.execute(
             """
@@ -571,54 +566,46 @@ def tamir_et():
                 post_id INTEGER,
                 user_id INTEGER,
                 yorum TEXT,
-                tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                parent_id INTEGER
             )
             """
         )
         conn.commit()
-        mesaj.append("✅ yorumlar tablo OK")
+        mesaj.append("✅ yorumlar tablosu OK")
     except Exception as e:
-        mesaj.append(f"❌ yorumlar tablo hata: {e}")
+        mesaj.append(f"❌ yorumlar: {e}")
 
-    # parent_id yoksa ekle
+    # parent_id yoksa ekle (eski tabloda)
     try:
-        if not tablo_sutun_var_mi(conn, "yorumlar", "parent_id"):
-            conn.execute("ALTER TABLE yorumlar ADD COLUMN parent_id INTEGER")
-            conn.commit()
-        mesaj.append("✅ parent_id OK")
-    except Exception as e:
-        mesaj.append(f"❌ parent_id hata: {e}")
+        conn.execute("ALTER TABLE yorumlar ADD COLUMN parent_id INTEGER")
+        conn.commit()
+        mesaj.append("✅ parent_id eklendi")
+    except:
+        mesaj.append("ℹ️ parent_id zaten var")
 
     # goruntulenme
     try:
-        if not tablo_sutun_var_mi(conn, "yazilar", "goruntulenme"):
-            conn.execute("ALTER TABLE yazilar ADD COLUMN goruntulenme INTEGER DEFAULT 0")
-            conn.commit()
+        conn.execute("ALTER TABLE yazilar ADD COLUMN goruntulenme INTEGER DEFAULT 0")
+        conn.commit()
         mesaj.append("✅ goruntulenme OK")
-    except Exception as e:
-        mesaj.append(f"❌ goruntulenme hata: {e}")
+    except:
+        mesaj.append("ℹ️ goruntulenme zaten var")
 
-    # profil_resmi
+    # profil alanları
     try:
-        if not tablo_sutun_var_mi(conn, "users", "profil_resmi"):
-            conn.execute("ALTER TABLE users ADD COLUMN profil_resmi TEXT")
-            conn.commit()
+        conn.execute("ALTER TABLE users ADD COLUMN profil_resmi TEXT")
+        conn.commit()
         mesaj.append("✅ profil_resmi OK")
-    except Exception as e:
-        mesaj.append(f"❌ profil_resmi hata: {e}")
-
-    # biyografi
+    except:
+        mesaj.append("ℹ️ profil_resmi zaten var")
+ 
     try:
-        if not tablo_sutun_var_mi(conn, "users", "biyografi"):
-            conn.execute("ALTER TABLE users ADD COLUMN biyografi TEXT")
-            conn.commit()
+        conn.execute("ALTER TABLE users ADD COLUMN biyografi TEXT")
+        conn.commit()
         mesaj.append("✅ biyografi OK")
-    except Exception as e:
-        mesaj.append(f"❌ biyografi hata: {e}")
+    except:
+        mesaj.append("ℹ️ biyografi zaten var")
 
     conn.close()
-    return "<br>".join(mesaj)
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    return "<br>".join(mesaj) 
