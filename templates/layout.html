@@ -183,6 +183,7 @@
                                 <i class="fas fa-user"></i> Hesabım
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
+                                
                                 {% if session.get('rol') in ['admin', 'yazar'] %}
                                     <li><a class="dropdown-item" href="{{ url_for('yeni_yazi') }}">✍️ Yazı Yaz</a></li>
                                 {% endif %}

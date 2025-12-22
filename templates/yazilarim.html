@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0">Yazılarım</h2>
+  <a href="{{ url_for('yeni_yazi') }}" class="btn btn-dark btn-sm">✍️ Yeni Yazı</a>
+</div>
+
+<div class="row">
+  {% for yazi in yazilar %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100 border-0 shadow-sm card-hover">
+
+        {% if yazi['resim'] %}
+          <img src="{{ url_for('static', filename='uploads/' + yazi['resim']) }}"
+               class="card-img-top" style="height: 180px; object-fit: cover;">
+        {% endif %}
+
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-uppercase fw-bold text-warning">{{ yazi['kategori'] }}</small>
+
+            {% if yazi['durum'] == 1 %}
+              <span class="badge bg-success">Yayımlandı</span>
+            {% else %}
+              <span class="badge bg-secondary">Onay bekliyor</span>
+            {% endif %}
+          </div>
+
+          <h5 class="card-title fw-bold">{{ yazi['baslik'] }}</h5>
+          <p class="card-text small text-muted">
+            {{ yazi['icerik'] | striptags | truncate(110) }}
+          </p>
+        </div>
+
+        <div class="card-footer bg-white border-0 d-flex gap-2">
+          {% if yazi['durum'] == 1 %}
+            <a href="{{ url_for('detay', id=yazi['id']) }}" class="btn btn-outline-dark btn-sm w-100">Görüntüle</a>
+          {% else %}
+            <a href="{{ url_for('detay', id=yazi['id']) }}" class="btn btn-outline-dark btn-sm w-100">Önizleme</a>
+          {% endif %}
+
+          <a href="{{ url_for('duzenle', id=yazi['id']) }}" class="btn btn-warning btn-sm">Düzenle</a>
+
+          <form method="post" action="{{ url_for('sil', id=yazi['id']) }}"
+                onsubmit="return confirm('Silmek istiyor musun?');">
+            <button class="btn btn-danger btn-sm">Sil</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  {% else %}
+    <p class="text-muted">Henüz yazın yok.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}

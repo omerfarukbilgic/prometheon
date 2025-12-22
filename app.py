@@ -550,6 +550,26 @@ def iletisim():
         return render_template("iletisim.html", basarili=True)
     return render_template("iletisim.html", basarili=False)
 
+# --- Yazılarım kısmı ---
+@app.route("/yazilarim")
+def yazilarim():
+    if not session.get("giris_yapildi"):
+        return redirect(url_for("giris"))
+
+    # Sadece admin/yazar görsün
+    if session.get("rol") not in ["admin", "yazar"]:
+        return "Yetkisiz", 403
+
+    conn = db_baglantisi_kur()
+    yazilar = conn.execute("""
+        SELECT *
+        FROM yazilar
+        WHERE author_id = ?
+        ORDER BY id DESC
+    """, (session["user_id"],)).fetchall()
+    conn.close()
+
+    return render_template("yazilarim.html", yazilar=yazilar)
 
 # --- TAMİR (DB migrate) ---
 @app.route("/tamir")
