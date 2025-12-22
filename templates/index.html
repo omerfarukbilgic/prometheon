@@ -17,7 +17,16 @@
                 <img src="{{ url_for('static', filename='uploads/' + yazi['resim']) }}" class="card-img-top" style="height: 200px; object-fit: cover;">
             {% endif %}
             <div class="card-body">
-                <small class="text-warning fw-bold text-uppercase">{{ yazi['kategori'] }}</small>
+                {% set k = yazi['kategori'] %}
+<span class="kat-badge
+  {% if k=='Politika' %}kat-politika
+  {% elif k=='Felsefe' %}kat-felsefe
+  {% elif k=='Sanat' %}kat-sanat
+  {% elif k=='Hukuk' %}kat-hukuk
+  {% elif k=='Ekonomi' %}kat-ekonomi
+  {% endif %}">
+  {{ k }}
+</span>
                 <h5 class="card-title mt-2"><a href="{{ url_for('detay', id=yazi['id']) }}" class="text-dark text-decoration-none">{{ yazi['baslik'] }}</a></h5>
                 <p class="card-text text-muted small">{{ yazi['icerik'] | striptags | truncate(100) }}</p>
                 <p class="text-muted small">
