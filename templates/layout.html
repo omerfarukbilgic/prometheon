@@ -187,6 +187,9 @@
                                 {% if session.get('rol') in ['admin', 'yazar'] %}
                                     <li><a class="dropdown-item" href="{{ url_for('yeni_yazi') }}">✍️ Yazı Yaz</a></li>
                                 {% endif %}
+                                {% if session.get('rol') in ['admin', 'yazar'] %}
+  <li><a class="dropdown-item" href="{{ url_for('yazilarim') }}">🗂 Yazılarım</a></li>
+{% endif %}
                                 {% if session.get('rol') == 'admin' %}
                                     <li><a class="dropdown-item" href="{{ url_for('admin_panel') }}">⚙️ Admin Paneli</a></li>
                                 {% endif %}
