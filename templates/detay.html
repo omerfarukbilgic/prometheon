@@ -18,8 +18,17 @@
 
       <div class="text-muted mb-4 d-flex justify-content-between">
         <span>
-          <i class="fas fa-user"></i> {{ yazi['ad_soyad'] }} |
-          <i class="fas fa-folder"></i> {{ yazi['kategori'] }} |
+          <i class="fas fa-user"></i>
+<a href="{{ url_for('yazar_profili', id=yazi['author_id']) }}" class="text-decoration-none">
+  {{ yazi['ad_soyad'] }}
+</a>
+|
+
+<i class="fas fa-folder"></i>
+<a href="{{ url_for('kategori_sayfasi', isim=yazi['kategori']) }}" class="text-decoration-none">
+  {{ yazi['kategori'] }}
+</a>
+|
           <i class="fas fa-clock"></i> {{ yazi['icerik'] | okuma_suresi }}
         </span>
         <span>
