@@ -236,3 +236,28 @@ a { text-decoration: none; color: inherit; }
     transform: translateY(-6px) scale(1.02);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
 }
+.kategori-chip{
+  display:inline-block;
+  padding: .28rem .55rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+/* Politika: koyu kahverengi */
+.kat-politika { background:#5a2d0c; }
+
+/* Felsefe: haki yeşili */
+.kat-felsefe { background:#4B5320; }
+
+/* Sanat: mavi */
+.kat-sanat { background:#1e5aa8; }
+
+/* Hukuk: kırmızı */
+.kat-hukuk { background:#b30000; }
+
+/* Ekonomi: yeşil */
+.kat-ekonomi { background:#1f7a1f; }

@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-12 text-center mb-5">
         <h1 class="display-4 font-italic">Son Yazılar</h1>
-        <p class="lead text-muted">ateşi çaldık karanlığı yakıyoruz.</p>
+        <p class="lead text-muted">Zincirsiz Zihinler, Cüretkar Fikirler</p>
         <hr class="w-25 mx-auto">
     </div>
 </div>
@@ -14,33 +14,37 @@
     <div class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm border-0 card-hover">
             {% if yazi['resim'] %}
-                <img src="{{ url_for('static', filename='uploads/' + yazi['resim']) }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                <img src="{{ url_for('static', filename='uploads/' + yazi['resim']) }}"
+                     class="card-img-top"
+                     style="height: 200px; object-fit: cover;">
             {% endif %}
+
             <div class="card-body">
-                {% set k = yazi['kategori'] %}
-<span class="kat-badge
-  {% if k=='Politika' %}kat-politika
-  {% elif k=='Felsefe' %}kat-felsefe
-  {% elif k=='Sanat' %}kat-sanat
-  {% elif k=='Hukuk' %}kat-hukuk
-  {% elif k=='Ekonomi' %}kat-ekonomi
-  {% endif %}">
-  {{ k }}
-</span>
-                <h5 class="card-title mt-2"><a href="{{ url_for('detay', id=yazi['id']) }}" class="text-dark text-decoration-none">{{ yazi['baslik'] }}</a></h5>
-                <p class="card-text text-muted small">{{ yazi['icerik'] | striptags | truncate(100) }}</p>
-                <p class="text-muted small">
-    <i class="fas fa-clock"></i> {{ yazi['icerik'] | okuma_suresi }}
-</p>
+                <span class="kategori-chip kat-{{ (yazi['kategori'] or '')|lower }}">
+                    {{ yazi['kategori'] }}
+                </span>
+
+                <h5 class="card-title mt-2">
+                    <a href="{{ url_for('detay', id=yazi['id']) }}"
+                       class="text-dark text-decoration-none">
+                        {{ yazi['baslik'] }}
+                    </a>
+                </h5>
+
+                <p class="card-text text-muted small">
+                    {{ yazi['icerik'] | striptags | truncate(100) }}
+                </p>
             </div>
+
             <div class="card-footer bg-white border-0">
-                <a href="{{ url_for('detay', id=yazi['id']) }}" class="btn btn-outline-dark btn-sm w-100">Devamını Oku</a>
+                <a href="{{ url_for('detay', id=yazi['id']) }}"
+                   class="btn btn-outline-dark btn-sm w-100">Devamını Oku</a>
             </div>
         </div>
     </div>
     {% else %}
         <div class="col-12 text-center">
-            <p>İlk kıvılcımı sen çak!</p>
+            <p>Henüz hiç yazı yok. İlkini sen yaz!</p>
         </div>
     {% endfor %}
 </div>
