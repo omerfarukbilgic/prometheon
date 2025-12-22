@@ -164,6 +164,25 @@ a { text-decoration: none; color: inherit; }
 .card-img-wrapper { overflow: hidden; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 .card-img-top { transition: transform 0.4s ease; }
 .card:hover .card-img-top { transform: scale(1.03); }
+
+.kategori-badge{
+    display:inline-block;
+    padding:4px 10px;
+    font-size:0.7rem;
+    font-weight:700;
+    text-transform:uppercase;
+    border-radius:3px;
+    color:#fff;
+    text-decoration:none;
+}
+
+/* Kategori renkleri */
+.kategori-politika { background:#5b3a29; }   /* koyu kahverengi */
+.kategori-felsefe  { background:#4B5320; }   /* haki yeşili */
+.kategori-sanat    { background:#2f6fd6; }   /* mavi */
+.kategori-hukuk    { background:#c0392b; }   /* kırmızı */
+.kategori-ekonomi  { background:#2ecc71; }   /* yeşil */
+
 /* --- FOOTER AYARLARI (TERS ŞELALE: AŞAĞIDAN YUKARIYA) --- */
 .footer {
     /* DİKEY GEÇİŞ (Bottom to Top) */
